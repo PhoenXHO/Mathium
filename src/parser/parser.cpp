@@ -64,6 +64,8 @@ std::unique_ptr<VariableDeclarationNode> Parser::variable_declaration_n(void)
 	if (curr_tk->type() == Token::Type::T_IDENTIFIER && next_tk->type() == Token::Type::T_IDENTIFIER)
 	{
 		variable_declaration->type = std::make_unique<TypeNode>(curr_tk->lexeme());
+		variable_declaration->type->location = curr_tk->location();
+		variable_declaration->type->length = curr_tk->lexeme().size();
 		consume_tk(); // Consume the identifier token
 	}
 
