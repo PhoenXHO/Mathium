@@ -36,7 +36,7 @@ struct Class : public Object
 	virtual std::string to_string(void) const
 	{
 		std::ostringstream oss;
-		oss << "<" << m_name << ">";
+		oss << "<class " << m_name << ">";
 		return oss.str();
 	}
 	const std::string & name(void) const

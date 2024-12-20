@@ -92,6 +92,13 @@ void Compiler::compile_variable_declaration(const VariableDeclarationNode * vari
 	if (variable_declaration->expression)
 	{
 		compile_expression(variable_declaration->expression.get());
+
+		// Check if the expression needs to be coerced
+		if (variable_declaration->needs_coercion)
+		{
+			chunk.emit(OP_COERCE, variable_declaration->coercion_index);
+		}
+		
 		chunk.emit(OP_SET_REFERENCE, index); // Set the variable in the current scope to the value on the stack and print it
 		compile_print(variable_declaration->print_expression);
 	}

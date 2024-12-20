@@ -9,6 +9,7 @@
 #include "object/object.hpp"
 #include "util/util.hpp"
 #include "class/class.hpp"
+#include "type/type.hpp"
 
 
 struct AST;
@@ -70,6 +71,10 @@ struct VariableDeclarationNode : public ASTNode
 	std::unique_ptr<TypeNode> type;
 	std::unique_ptr<IdentifierNode> identifier;
 	std::unique_ptr<ASTNode> expression;
+
+	bool needs_coercion = false;
+	size_t coercion_index = 0;
+
 	bool print_expression = false;
 	size_t variable_index = 0;
 

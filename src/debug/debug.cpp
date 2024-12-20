@@ -36,16 +36,22 @@ std::vector<uint8_t>::const_iterator Chunk::disassemble_instruction(std::vector<
 	{
 	case OP_LOAD_CONSTANT:
 		std::cout << "LOAD_CONSTANT"
-				  << std::setw(6) << std::setfill(' ') << std::right
+				  << std::setw(9) << std::setfill(' ') << std::right
 				  << static_cast<int>(*(ip + 1)) << std::left
 				  << "  (" << constant_pool[static_cast<int>(*(ip + 1))]->to_string() << ')';
+		return ip + 2;
+
+	case OP_COERCE:
+		std::cout << "COERCE"
+				  << std::setw(9) << std::setfill(' ') << std::right
+				  << static_cast<int>(*(ip + 1)) << std::left;
 		return ip + 2;
 
 	case OP_SET_REFERENCE:
 	{
 		auto variable = current_scope->get_symbol(static_cast<int>(*(ip + 1)));
-		std::cout << "SET_VARIABLE" 
-				  << std::setw(6) << std::setfill(' ') << std::right
+		std::cout << "SET_REFERENCE" 
+				  << std::setw(9) << std::setfill(' ') << std::right
 				  << static_cast<int>(*(ip + 1)) << std::left
 				  << "  " << variable->to_string();
 		return ip + 2;
@@ -53,8 +59,8 @@ std::vector<uint8_t>::const_iterator Chunk::disassemble_instruction(std::vector<
 	case OP_GET_REFERENCE:
 	{
 		auto variable = current_scope->get_symbol(static_cast<int>(*(ip + 1)));
-		std::cout << "GET_VARIABLE" 
-				  << std::setw(6) << std::setfill(' ') << std::right
+		std::cout << "GET_REFERENCE" 
+				  << std::setw(9) << std::setfill(' ') << std::right
 				  << static_cast<int>(*(ip + 1)) << std::left
 				  << "  " << variable->to_string();
 		return ip + 2;
@@ -65,17 +71,17 @@ std::vector<uint8_t>::const_iterator Chunk::disassemble_instruction(std::vector<
 				  << std::setw(6) << std::setfill(' ') << std::right
 				  << static_cast<int>(*(ip + 1)) << std::left
 				  << "  " << static_cast<int>(*(ip + 2))
-				  << "  '" << current_scope->get_symbol(static_cast<int>(*(ip + 1)))->to_string() << '\'';
+				  << "  " << current_scope->get_symbol(static_cast<int>(*(ip + 1)))->to_string();
 		return ip + 3;
 
 	case OP_CALL_UNARY:
 		std::cout << "CALL_UNARY"
-				  << std::setw(6) << std::setfill(' ') << std::right
+				  << std::setw(9) << std::setfill(' ') << std::right
 				  << static_cast<int>(*(ip + 1)) << std::left;
 		return ip + 2;
 	case OP_CALL_BINARY:
 		std::cout << "CALL_BINARY"
-				  << std::setw(6) << std::setfill(' ') << std::right
+				  << std::setw(9) << std::setfill(' ') << std::right
 				  << static_cast<int>(*(ip + 1)) << std::left;
 		return ip + 2;
 

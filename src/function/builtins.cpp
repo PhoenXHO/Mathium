@@ -8,8 +8,7 @@
 #include "symbol/symbol_table.hpp"
 
 
-// For testing purposes
-namespace builtins
+void SymbolTable::init_builtin_functions(void)
 {
 	FunctionImplentationPtr print0 = std::make_shared<BuiltinFunctionImplentation>(
 		FunctionSignature(),
@@ -35,15 +34,11 @@ namespace builtins
 			return Object::none;
 		}
 	);
-}
 
-
-void SymbolTable::init_builtin_functions(void)
-{
 	auto print = std::make_shared<Function>("print");
-	print->define(builtins::print0);
-	print->define(builtins::print1);
-	print->define(builtins::print2);
+	print->define(print0);
+	print->define(print1);
+	print->define(print2);
 
 	define("print", print);
 }

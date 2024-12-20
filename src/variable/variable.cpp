@@ -12,8 +12,9 @@ Variable::Variable(std::string_view name, ClassPtr cls) :
 std::string Variable::to_string(void) const
 {
 	std::ostringstream oss;
-	oss << '<' << m_name << ' ' << value_class()->to_string()
-		<< " (" << std::uppercase << this << ") = "
-		<< value()->to_string() << '>';
+	oss << '<' << m_name
+		<< " (" << value_class()->name() << ") = "
+		<< value()->to_string() << '>'
+		<< " (" << this << ')';
 	return oss.str();
 }

@@ -133,9 +133,7 @@ std::unique_ptr<ASTNode> Parser::expression_n(Precedence min_p)
 {
 	auto left = operand_n();
 	if (!left)
-	{
 		return nullptr;
-	}
 	consume_tk();
 
 	while (!curr_tk->is_eof() && curr_tk->is_operator())
@@ -156,7 +154,9 @@ std::unique_ptr<ASTNode> Parser::expression_n(Precedence min_p)
 				expect_tk(Token::Type::T_NONE, "Expected an expression");
 			}
 
+			auto location = left->location;
 			left = std::make_unique<ExpressionNode>(std::move(left), std::move(op), std::move(right));
+			left->location = location;
 		}
 		else if (op->associativity() == Associativity::A_RIGHT) // Right-associative
 		{
@@ -173,8 +173,7 @@ std::unique_ptr<ASTNode> Parser::expression_n(Precedence min_p)
 			expect_tk(Token::Type::T_NONE, "Non-associative operators are not supported");
 		}
 
-		left->location = left->location;
-		left->length = curr_tk->location().position - left->location.position + 1;
+		left->length = curr_tk->location().position - left->location.position;
 	}
 
 	return left;
@@ -199,7 +198,7 @@ std::unique_ptr<ASTNode> Parser::operand_n(void)
 
 	//TODO: Handle postfix operators
 
-	operand->length = curr_tk->location().position - operand->location.position + 1;
+	operand->length = operand->primary->location.position + operand->primary->length - operand->location.position;
 	return operand;
 }
 

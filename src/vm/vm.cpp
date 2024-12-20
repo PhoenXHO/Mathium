@@ -66,6 +66,17 @@ void VM::run(void)
 		}
 		break;
 
+	case OP_COERCE:
+		{
+			auto index = READ_BYTE();
+			auto coercion_path = TypeCoercion::instance().get_path(index);
+			auto value = stack.top();
+			stack.pop();
+			auto result = coercion_path->apply(value);
+			stack.push(result);
+		}
+		break;
+
 	case OP_SET_REFERENCE:
 		{
 			auto index = READ_BYTE();
@@ -152,7 +163,7 @@ void VM::run(void)
 			std::cout << result->to_string();
 			if (config::dev)
 			{
-				std::cout << ' ' << result->get_class()->to_string();
+				std::cout << " (" << result->get_class()->name() << ")";
 			}
 			std::cout << std::endl;
 		}

@@ -13,6 +13,10 @@ enum OpCode : uint8_t
 	// + operand: `index` (1 byte); the index of the constant in the constant pool
 	OP_LOAD_CONSTANT,
 
+	// Instruction to coerce the top of the stack to another type
+	// + operand: `index` (1 byte); the index of the type in the coercion cache
+	OP_COERCE,
+
 	// Instruction to set a reference in the current scope to the value on the top of the stack (the top of the stack is not popped)
 	// + operand: `index` (1 byte); the index of the reference in the current scope
 	OP_SET_REFERENCE,

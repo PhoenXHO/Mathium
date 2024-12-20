@@ -29,6 +29,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze(ASTNode * node)
 	case ASTNode::Type::N_LITERAL:
 		return analyze_literal(static_cast<LiteralNode *>(node));
 	default:
+		// For debugging purposes
 		globals::error_handler.log_semantic_error({
 			"Unknown AST node type",
 			node->location,
@@ -36,7 +37,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze(ASTNode * node)
 		}, true);
 	}
 
-	return {builtins::none_class};
+	return { builtins::none_class };
 }
 
 SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_variable_declaration(VariableDeclarationNode * variable_declaration)
@@ -46,7 +47,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_variable_declaration(
 	{
 		// Log a warning instead of an error, to allow overwriting variables
 		globals::error_handler.log_warning({
-			"Cannot redefine symbol '" + std::string(variable_declaration->identifier->name) + "'",
+			"Redefinition of symbol '" + std::string(variable_declaration->identifier->name) + "'",
 			variable_declaration->identifier->location,
 			variable_declaration->identifier->length
 		});
@@ -62,18 +63,28 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_variable_declaration(
 	// Analyze the expression if it exists
 	if (variable_declaration->expression)
 	{
-		//! For now, there is no casting in variable declarations
-		//TODO: Implement constructors in classes
 		auto result = analyze(variable_declaration->expression.get());
-		if (type && !type->is_sub_class(result.cls))
+
+		if (type)
 		{
-			globals::error_handler.log_semantic_error({
-				"Type mismatch in variable declaration",
-				variable_declaration->expression->location,
-				variable_declaration->expression->length,
-				"Expected: " + type->to_string() + '\n' +
-				"Got: " + result.cls->to_string()
-			}, true);
+			// Try to find a coercion path
+			auto coercion_path = TypeCoercion::instance().find_best_coercion_path(result.cls, type);
+
+			// If a coercion path is found, use it
+			if (coercion_path->total_cost != -1)
+			{
+				// Store the coercion path index for the compiler
+				variable_declaration->coercion_index = TypeCoercion::instance().get_path_index(result.cls, type);
+				variable_declaration->needs_coercion = true;
+			}
+			else
+			{
+				globals::error_handler.log_semantic_error({
+					"Cannot convert '" + result.cls->name() + "' to '" + type->name() + "'",
+					variable_declaration->expression->location,
+					variable_declaration->expression->length
+				}, true);
+			}
 		}
 	}
 
@@ -90,7 +101,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_variable_declaration(
 	}
 	variable_declaration->variable_index = index;
 
-	return {builtins::none_class};
+	return { builtins::none_class };
 }
 
 SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_expression(ExpressionNode * expression)
@@ -120,7 +131,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_expression(Expression
 		}, true);
 	}
 
-	return {builtins::none_class};
+	return { builtins::none_class };
 }
 
 SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_operand(OperandNode * operand)
@@ -154,7 +165,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_operand(OperandNode *
 		}, true);
 	}
 
-	return {builtins::none_class};
+	return { builtins::none_class };
 }
 
 SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_function_call(FunctionCallNode * function_call)
