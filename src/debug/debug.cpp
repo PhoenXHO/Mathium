@@ -41,18 +41,18 @@ std::vector<uint8_t>::const_iterator Chunk::disassemble_instruction(std::vector<
 				  << "  (" << constant_pool[static_cast<int>(*(ip + 1))]->to_string() << ')';
 		return ip + 2;
 
-	case OP_SET_VARIABLE:
+	case OP_SET_REFERENCE:
 	{
-		auto variable = current_scope->get_variable(static_cast<int>(*(ip + 1)));
+		auto variable = current_scope->get_symbol(static_cast<int>(*(ip + 1)));
 		std::cout << "SET_VARIABLE" 
 				  << std::setw(6) << std::setfill(' ') << std::right
 				  << static_cast<int>(*(ip + 1)) << std::left
 				  << "  " << variable->to_string();
 		return ip + 2;
 	}
-	case OP_GET_VARIABLE:
+	case OP_GET_REFERENCE:
 	{
-		auto variable = current_scope->get_variable(static_cast<int>(*(ip + 1)));
+		auto variable = current_scope->get_symbol(static_cast<int>(*(ip + 1)));
 		std::cout << "GET_VARIABLE" 
 				  << std::setw(6) << std::setfill(' ') << std::right
 				  << static_cast<int>(*(ip + 1)) << std::left
@@ -65,7 +65,7 @@ std::vector<uint8_t>::const_iterator Chunk::disassemble_instruction(std::vector<
 				  << std::setw(6) << std::setfill(' ') << std::right
 				  << static_cast<int>(*(ip + 1)) << std::left
 				  << "  " << static_cast<int>(*(ip + 2))
-				  << "  '" << current_scope->get_function(static_cast<int>(*(ip + 1)))->to_string() << '\'';
+				  << "  '" << current_scope->get_symbol(static_cast<int>(*(ip + 1)))->to_string() << '\'';
 		return ip + 3;
 
 	case OP_CALL_UNARY:

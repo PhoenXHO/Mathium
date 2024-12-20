@@ -10,63 +10,39 @@
 #include "function/function.hpp"
 #include "operator/operator.hpp"
 #include "object/none_object.hpp"
-#include "class/builtins.hpp" // for `Builtins`
+#include "class/builtins.hpp"
 
 
 class SymbolTable
 {
-	Registry<VariablePtr> variables;
-	Registry<FunctionPtr> functions;
+	Registry<VariablePtr> symbols;
 	OperatorRegistry operators;
-	Registry<ClassPtr> classes;
 
 public:
 	SymbolTable() = default;
 	~SymbolTable() = default;
 
-	#pragma region Variables
-	Registry<VariablePtr> & get_variables(void)
-	{ return variables; }
 
-	VariablePtr define_variable(std::string_view name, ObjectPtr value = nullptr);
+	#pragma region Symbols
+	std::pair<size_t, VariablePtr> define(std::string_view name, const ObjectPtr & object);
 
-	size_t v_size() const
-	{ return variables.size(); }
+	/// @brief Find the symbol in the symbol table with the given name
+	/// @return A pair containing the index of the symbol in the symbol table and the symbol itself,
+	/// or `{ -1, nullptr }` if the symbol is not defined
+	std::pair<size_t, VariablePtr> find(std::string_view name) const
+	{ return symbols.find(name); }
 
-	/// @brief Get the variable from the symbol table at the given index
-	/// @return The variable at the given index or `nullptr` if the index is out of bounds
-	VariablePtr get_variable(size_t index) const
-	{ return index < variables.size() ? variables[index] : nullptr; }
+	VariablePtr get(size_t index) const
+	{ return symbols[index]; }
 
-	/// @brief Get the variable from the symbol table with the given name
-	/// @return The variable with the given name or `nullptr` if the variable is not defined
-	size_t get_variable_index(std::string_view name) const
-	{ return variables.get_index(name); }
-
-	/// @brief Get the variable from the symbol table with the given name
-	/// @return The variable with the given name or `nullptr` if the variable is not defined
-	std::pair<size_t, VariablePtr> get_variable(std::string_view name) const
-	{ return variables.find(name); }
-
-	void set_variable(size_t index, ObjectPtr value)
-	{ variables[index]->set(value); }
-	#pragma endregion
-
-
-	#pragma region Functions
-	Registry<FunctionPtr> & get_functions(void)
-	{ return functions; }
 
 	void init_builtin_functions(void);
+	void init_builtin_classes(void)
+	{
+		Builtins::init_builtin_classes(this);
 
-	FunctionPtr define_function(std::string_view name)
-	{ return functions.define(name, std::make_shared<Function>(name)); }
-
-	std::pair<size_t, FunctionPtr> find_function(std::string_view name) const
-	{ return functions.find(name); }
-
-	FunctionPtr get_function(size_t index) const
-	{ return functions[index]; }
+		Object::none = std::make_shared<NoneObj>();
+	}
 	#pragma endregion
 
 
@@ -81,24 +57,5 @@ public:
 
 	OperatorPtr find_operator(std::string_view symbol, bool is_unary = false) const
 	{ return operators.find(symbol, is_unary); }
-	#pragma endregion
-
-
-	#pragma region Classes
-	Registry<ClassPtr> & get_classes(void)
-	{ return classes; }
-
-	void init_builtin_classes(void)
-	{
-		Builtins::init_builtin_classes();
-
-		Object::none = std::make_shared<NoneObj>();
-	}
-
-	void define_class(std::string_view name, const ClassPtr & cls)
-	{ classes.define(name, cls); }
-
-	std::pair<size_t, ClassPtr> find_class(std::string_view name) const
-	{ return classes.find(name); }
 	#pragma endregion
 };

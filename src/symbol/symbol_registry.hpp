@@ -22,11 +22,11 @@ public:
 	Registry() = default;
 	~Registry() = default;
 
-	T define(std::string_view name, T object)
+	std::pair<size_t, T> define(std::string_view name, T object)
 	{
 		indices[std::string(name)] = objects.size();
 		objects.push_back(object);
-		return object;
+		return { objects.size() - 1, object };
 	}
 
 	size_t get_index(std::string_view name) const

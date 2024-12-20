@@ -8,6 +8,9 @@ ObjectPtr Object::none = nullptr;
 
 void Object::init_properties(void)
 {
+	if (!m_class)
+		return; // Late initialization
+
 	//TODO: Update this to add the superclasses' properties
 	// Initialize the properties from the class
 	for (auto & prop : m_class->properties())

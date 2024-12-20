@@ -1,9 +1,11 @@
 #pragma once
 
+#include "interface/numeric.hpp"
 #include "object/object.hpp"
+#include "class/builtins.hpp"
 
 
-class IntegerObj : public Object
+class IntegerObj : public Object, public INumeric
 {
 	mpz_int m_value;
 	size_t m_size;

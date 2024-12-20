@@ -66,19 +66,22 @@ void VM::run(void)
 		}
 		break;
 
-	case OP_SET_VARIABLE:
+	case OP_SET_REFERENCE:
 		{
 			auto index = READ_BYTE();
 			auto value = stack.top();
 			// Set the variable in the current scope to the value on the stack
-			current_scope->set_variable(index, value);
+			auto symbol = current_scope->get_symbol(index);
+			auto variable = std::dynamic_pointer_cast<Variable>(symbol);
+			variable->set(value);
 		}
 		break;
-	case OP_GET_VARIABLE:
+	case OP_GET_REFERENCE:
 		{
 			auto index = READ_BYTE();
-			auto value = current_scope->get_variable(index)->value();
-			stack.push(value);
+			auto symbol = current_scope->get_symbol(index);
+			auto variable = std::dynamic_pointer_cast<Variable>(symbol);
+			stack.push(variable->value());
 		}
 		break;
 
@@ -87,7 +90,9 @@ void VM::run(void)
 			auto function_index = READ_BYTE();
 			auto function_implementation_index = READ_BYTE();
 
-			auto function = current_scope->get_function(function_index);
+			auto symbol = current_scope->get_symbol(function_index);
+			auto function_reference = std::dynamic_pointer_cast<Variable>(symbol);
+			auto function = std::dynamic_pointer_cast<Function>(function_reference->value());
 			auto implementation = function->get_implementation(function_implementation_index);
 			
 			if (implementation->type() == FunctionImplentation::Type::F_BUILTIN)

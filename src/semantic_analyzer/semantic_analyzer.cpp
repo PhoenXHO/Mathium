@@ -41,19 +41,19 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze(ASTNode * node)
 
 SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_variable_declaration(VariableDeclarationNode * variable_declaration)
 {
-	// Check if the variable is already defined in the current scope
-	if (current_scope->is_variable_defined(variable_declaration->identifier->name))
+	// Check if the variable name is already defined in the current scope
+	if (current_scope->is_symbol_defined(variable_declaration->identifier->name))
 	{
 		// Log a warning instead of an error, to allow overwriting variables
 		globals::error_handler.log_warning({
-			"Variable '" + std::string(variable_declaration->identifier->name) + "' is already defined",
+			"Cannot redefine symbol '" + std::string(variable_declaration->identifier->name) + "'",
 			variable_declaration->identifier->location,
 			variable_declaration->identifier->length
 		});
 	}
 
-	ClassPtr type = nullptr;
 	// Analyze the type if it exists
+	ClassPtr type = nullptr;
 	if (variable_declaration->type)
 	{
 		type = analyze_type(variable_declaration->type.get()).cls;
@@ -78,15 +78,17 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_variable_declaration(
 	}
 
 	// Add the variable to the current scope
+	size_t index;
 	if (type)
 	{
-		current_scope->define_variable(variable_declaration->identifier->name, type);
+		index = current_scope->define_variable(variable_declaration->identifier->name, type).first;
 	}
 	else
 	{
 		// If the type is not defined, use the default type
-		current_scope->define_variable(variable_declaration->identifier->name);
+		index = current_scope->define_variable(variable_declaration->identifier->name).first;
 	}
+	variable_declaration->variable_index = index;
 
 	return {Builtins::none_class};
 }
@@ -157,16 +159,26 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_operand(OperandNode *
 
 SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_function_call(FunctionCallNode * function_call)
 {
-	// Check if the function is defined in the current scope
-	auto function = current_scope->find_function(function_call->identifier->name);
-	if (!function.second)
+	auto [index, symbol] = current_scope->find_symbol(function_call->identifier->name);
+	if (index == -1)
 	{
 		globals::error_handler.log_semantic_error({
-			"Function '" + std::string(function_call->identifier->name) + "' is not defined",
+			"Symbol '" + std::string(function_call->identifier->name) + "' is not defined",
 			function_call->identifier->location,
 			function_call->identifier->length
 		}, true);
 	}
+	else if (!symbol->is_function())
+	{
+		globals::error_handler.log_semantic_error({
+			"Symbol '" + std::string(function_call->identifier->name) + "' is not a function",
+			function_call->identifier->location,
+			function_call->identifier->length
+		}, true);
+	}
+
+	auto function_reference = std::dynamic_pointer_cast<Variable>(symbol);
+	auto function = std::dynamic_pointer_cast<Function>(function_reference->value());
 	
 	// Analyze the arguments
 	FunctionSignature signature;
@@ -177,7 +189,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_function_call(Functio
 	}
 
 	// Find the most specific implementation of the function for the given signature
-	auto impl = function.second->find_implentation(signature);
+	auto impl = function->find_implentation(signature);
 	if (!impl.second)
 	{
 		globals::error_handler.log_semantic_error({
@@ -189,52 +201,51 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_function_call(Functio
 	}
 
 	// Store the index of the function for the compiler
-	function_call->function_index = function.first;
+	function_call->function_index = index;
 	function_call->function_implementation_index = impl.first;
 	return impl.second->return_class();
 }
 
 SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_identifier(IdentifierNode * identifier)
 {
-	// Check if the variable is defined in the current scope
-	auto & variable = current_scope->get_variable(identifier->name);
-	if (!variable)
+	auto [index, symbol] = current_scope->find_symbol(identifier->name);
+	if (index == -1)
 	{
 		globals::error_handler.log_semantic_error({
-			"Variable '" + std::string(identifier->name) + "' is not defined",
+			"Symbol '" + std::string(identifier->name) + "' is not defined",
 			identifier->location,
 			identifier->length
 		}, true);
 	}
 
-	// Get the type of the variable
-	if (variable->value_class() == Builtins::none_class)
-	{
-		// The variable is not initialized
-		globals::error_handler.log_semantic_error({
-			"Variable '" + std::string(identifier->name) + "' is not initialized",
-			identifier->location,
-			identifier->length
-		}, true);
-	}
-
-	return variable->get_class();
+	identifier->symbol_index = index;
+	auto reference = std::dynamic_pointer_cast<Variable>(symbol);
+	return reference->value_class();
 }
 
 SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_type(TypeNode * type)
 {
-	// Check if the class is defined
-	auto cls = current_scope->get_classes()[type->name];
-	if (!cls.second)
+	auto [index, symbol] = current_scope->find_symbol(type->name);
+	if (index == -1)
 	{
 		globals::error_handler.log_semantic_error({
-			"Class '" + std::string(type->name) + "' is not defined",
+			"Type '" + std::string(type->name) + "' is not defined",
 			type->location,
 			type->length
 		}, true);
 	}
 
-	return cls.second;
+	if (!symbol->is_class())
+	{
+		globals::error_handler.log_semantic_error({
+			"Symbol '" + std::string(type->name) + "' is not a class",
+			type->location,
+			type->length
+		}, true);
+	}
+
+	auto cls = std::dynamic_pointer_cast<Class>(symbol->value());
+	return cls;
 }
 
 SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_literal(LiteralNode * literal)

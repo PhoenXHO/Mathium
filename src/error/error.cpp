@@ -19,12 +19,13 @@ void Error::set_message(std::string_view message, std::string_view suggestion, s
 	std::string_view type_str;
 	switch (m_type)
 	{
-		case Type::LEXICAL: type_str = "\033[1;31mLEXICAL_ERROR"; break;
-		case Type::SYNTAX: type_str = "\033[1;31mSYNTAX_ERROR"; break;
-		case Type::SEMANTIC: type_str = "\033[1;31mSEMANTIC_ERROR"; break;
-		case Type::COMPILETIME: type_str = "\033[1;31mCOMPILETIME_ERROR"; break;
-		case Type::RUNTIME: type_str = "\033[1;31mRUNTIME_ERROR"; break;
-		case Type::WARNING: type_str = "\033[1;33mWARNING"; break;
+		case Type::E_LEXICAL: type_str = "\033[1;31mLEXICAL_ERROR"; break;
+		case Type::E_SYNTAX: type_str = "\033[1;31mSYNTAX_ERROR"; break;
+		case Type::E_SEMANTIC: type_str = "\033[1;31mSEMANTIC_ERROR"; break;
+		case Type::E_COMPILETIME: type_str = "\033[1;31mCOMPILETIME_ERROR"; break;
+		case Type::E_RUNTIME: type_str = "\033[1;31mRUNTIME_ERROR"; break;
+		case Type::E_INTERNAL: type_str = "\033[1;31mINTERNAL_ERROR"; break;
+		case Type::E_WARNING: type_str = "\033[1;33mWARNING"; break;
 	}
 
 	this->message += std::string(type_str) + ":\033[0m " + std::string(message);

@@ -60,13 +60,13 @@ struct Error
 {
 	enum class Type
 	{
-		LEXICAL,
-		SYNTAX,
-		SEMANTIC,
-		COMPILETIME,
-		RUNTIME,
-		INTERNAL,
-		WARNING
+		E_LEXICAL,
+		E_SYNTAX,
+		E_SEMANTIC,
+		E_COMPILETIME,
+		E_RUNTIME,
+		E_INTERNAL,
+		E_WARNING
 	};
 
 	Error(Type type, ErrorInfo info) :
@@ -96,36 +96,36 @@ protected:
 struct LexicalError : public Error
 {
 	LexicalError(ErrorInfo info) :
-		Error(Type::LEXICAL, info)
+		Error(Type::E_LEXICAL, info)
 	{}
 };
 struct SyntaxError : public Error
 {
 	SyntaxError(ErrorInfo info) :
-		Error(Type::SYNTAX, info)
+		Error(Type::E_SYNTAX, info)
 	{}
 };
 struct SemanticError : public Error
 {
 	SemanticError(ErrorInfo info) :
-		Error(Type::SEMANTIC, info)
+		Error(Type::E_SEMANTIC, info)
 	{}
 };
 struct CompiletimeError : public Error
 {
 	CompiletimeError(ErrorInfo info) :
-		Error(Type::COMPILETIME, info)
+		Error(Type::E_COMPILETIME, info)
 	{}
 };
 struct RuntimeError : public Error
 {
 	RuntimeError(ErrorInfo info) :
-		Error(Type::RUNTIME, info)
+		Error(Type::E_RUNTIME, info)
 	{}
 };
 struct Warning : public Error
 {
 	Warning(ErrorInfo info) :
-		Error(Type::WARNING, info)
+		Error(Type::E_WARNING, info)
 	{}
 };

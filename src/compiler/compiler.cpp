@@ -76,8 +76,7 @@ void Compiler::compile_statement(const ASTNode * statement_n)
 
 void Compiler::compile_variable_declaration(const VariableDeclarationNode * variable_declaration)
 {
-	// The semantic analyzer should have already added the variable to the current scope
-	size_t index = current_scope->get_variable_index(variable_declaration->identifier->name);
+	size_t index = variable_declaration->variable_index;
 	if (index >= UINT8_MAX)
 	{
 		// We have reached the maximum number of variables
@@ -93,7 +92,7 @@ void Compiler::compile_variable_declaration(const VariableDeclarationNode * vari
 	if (variable_declaration->expression)
 	{
 		compile_expression(variable_declaration->expression.get());
-		chunk.emit(OP_SET_VARIABLE, index); // Set the variable in the current scope to the value on the stack and print it
+		chunk.emit(OP_SET_REFERENCE, index); // Set the variable in the current scope to the value on the stack and print it
 		compile_print(variable_declaration->print_expression);
 	}
 }
@@ -229,8 +228,7 @@ void Compiler::compile_function_call(const FunctionCallNode * function_call_n)
 
 void Compiler::compile_identifier(const IdentifierNode * identifier_n)
 {
-	//TODO: Store the index during semantic analysis to avoid searching for the variable again
-	size_t index = current_scope->get_variable_index(identifier_n->name);
+	size_t index = identifier_n->symbol_index;
 	if (index >= UINT8_MAX)
 	{
 		// We have reached the maximum number of variables
@@ -242,7 +240,7 @@ void Compiler::compile_identifier(const IdentifierNode * identifier_n)
 		return;
 	}
 
-	chunk.emit(OP_GET_VARIABLE, index);
+	chunk.emit(OP_GET_REFERENCE, index);
 }
 
 void Compiler::compile_literal(const LiteralNode * literal_n)

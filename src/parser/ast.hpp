@@ -71,6 +71,7 @@ struct VariableDeclarationNode : public ASTNode
 	std::unique_ptr<IdentifierNode> identifier;
 	std::unique_ptr<ASTNode> expression;
 	bool print_expression = false;
+	size_t variable_index = 0;
 
 	VariableDeclarationNode() : ASTNode(Type::N_VARIABLE_DECLARATION) {}
 	~VariableDeclarationNode() = default;
@@ -171,7 +172,7 @@ struct FunctionCallNode : public ASTNode
 struct IdentifierNode : public ASTNode
 {
 	std::string_view name;
-	size_t variable_index = 0;
+	size_t symbol_index = 0;
 
 	IdentifierNode() : ASTNode(Type::N_IDENTIFIER) {}
 	IdentifierNode(std::string_view name) : ASTNode(Type::N_IDENTIFIER), name(name) {}

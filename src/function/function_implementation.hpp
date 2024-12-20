@@ -7,7 +7,9 @@
 #include <vector>
 #include <functional>
 
+#include "interface/callable.hpp"
 #include "class/class.hpp"
+#include "class/builtins.hpp"
 
 
 class FunctionImplentation;
@@ -51,7 +53,7 @@ struct FunctionSignature
 	std::string to_string(bool parameters_only = false) const;
 };
 
-class FunctionImplentation
+class FunctionImplentation : public ICallable
 {
 protected:
 	FunctionSignature m_signature;
@@ -77,7 +79,6 @@ public:
 	ClassPtr return_class() const
 	{ return m_signature.return_type; }
 
-	virtual ObjectPtr call(const std::vector<ObjectPtr> & arguments) const = 0;
 	ObjectPtr operator()(const std::vector<ObjectPtr> & arguments) const
 	{ return call(arguments); }
 

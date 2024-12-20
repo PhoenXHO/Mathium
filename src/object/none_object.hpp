@@ -1,6 +1,7 @@
 #pragma once
 
 #include "object/object.hpp"
+#include "class/builtins.hpp"
 
 
 class NoneObj : public Object
@@ -12,8 +13,6 @@ public:
 	std::string to_string(void) const override
 	{ return "none"; }
 
-	ObjectPtr add(const ObjectPtr & rhs) const override
-	{ return Object::none; }
 	ObjectPtr cast_to(const ClassPtr & cls) override
 	{ return nullptr; }
 };

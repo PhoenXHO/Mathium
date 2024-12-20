@@ -15,7 +15,7 @@ namespace Builtins
 		FunctionSignature(),
 		[](const std::vector<ObjectPtr> & arguments) -> ObjectPtr
 		{
-			std::cout << "None" << std::endl;
+			std::cout << "Hello World!" << std::endl;
 			return Object::none;
 		}
 	);
@@ -40,8 +40,10 @@ namespace Builtins
 
 void SymbolTable::init_builtin_functions(void)
 {
-	auto print = define_function("print");
+	auto print = std::make_shared<Function>("print");
 	print->define(Builtins::print0);
 	print->define(Builtins::print1);
 	print->define(Builtins::print2);
+
+	define("print", print);
 }

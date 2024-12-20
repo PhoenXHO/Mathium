@@ -1,9 +1,11 @@
 #pragma once
 
+#include "interface/numeric.hpp"
 #include "object/object.hpp"
+#include "class/builtins.hpp"
 
 
-class RealObj : public Object
+class RealObj : public Object, public INumeric
 {
 	mpfr_float m_value;
 	size_t m_integer_part;

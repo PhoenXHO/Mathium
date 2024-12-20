@@ -2,6 +2,7 @@
 #define VARIABLE_HPP
 
 #include "object/object.hpp"
+#include "class/builtins.hpp"
 
 
 struct Variable;
@@ -22,8 +23,8 @@ struct Variable : public Object
 
 	std::string to_string(void) const override;
 
-	ObjectPtr add(const ObjectPtr & rhs) const override
-	{ return m_value->add(rhs); }
+	std::string name(void) const
+	{ return m_name; }
 
 	void set(ObjectPtr value)
 	{ this->m_value = value; }
@@ -34,11 +35,17 @@ struct Variable : public Object
 	ClassPtr value_class(void) const
 	{ return m_value ? m_value->get_class() : Builtins::none_class; }
 
-	std::string name(void) const
-	{ return m_name; }
-
 	ObjectPtr cast_to(const ClassPtr & cls) override
 	{ return m_value->cast_to(cls); }
+
+	bool is_reference(void) const
+	{ return m_value->get_class() == Builtins::reference_class; }
+
+	bool is_function(void) const
+	{ return m_value->get_class() == Builtins::function_class; }
+
+	bool is_class(void) const
+	{ return m_value->get_class() == Builtins::class_class; }
 
 private:
 	std::string m_name;

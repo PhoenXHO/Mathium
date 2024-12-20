@@ -13,12 +13,12 @@ enum OpCode : uint8_t
 	// + operand: `index` (1 byte); the index of the constant in the constant pool
 	OP_LOAD_CONSTANT,
 
-	// Instruction to set a variable in the current scope to the value on the top of the stack (the top of the stack is not popped)
-	// + operand: `index` (1 byte); the index of the variable in the current scope
-	OP_SET_VARIABLE,
-	// Instruction to get a variable from the current scope
-	// + operand: `index` (1 byte); the index of the variable in the current scope
-	OP_GET_VARIABLE,
+	// Instruction to set a reference in the current scope to the value on the top of the stack (the top of the stack is not popped)
+	// + operand: `index` (1 byte); the index of the reference in the current scope
+	OP_SET_REFERENCE,
+	// Instruction to get a reference from the current scope
+	// + operand: `index` (1 byte); the index of the reference in the current scope
+	OP_GET_REFERENCE,
 
 	// Instruction to call a function
 	// + operands:

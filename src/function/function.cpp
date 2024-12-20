@@ -27,18 +27,6 @@ std::pair<size_t, FunctionImplentationPtr> FunctionImplentationRegistry::find_mo
 	}
 
 	return { most_specific_index, most_specific };
-
-	//for (const auto & impl : implementations)
-	//{
-	//	int specificity = impl.first.measure_specificity(signature);
-	//	if (specificity > most_specific_specificity)
-	//	{
-	//		most_specific = impl.second;
-	//		most_specific_specificity = specificity;
-	//	}
-	//}
-
-	//return most_specific;
 }
 
 int FunctionImplentationRegistry::measure_specificity(const FunctionSignature & signature, const FunctionSignature & other) const

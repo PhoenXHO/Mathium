@@ -1,4 +1,5 @@
 #include "operator/operator.hpp"
+#include "interface/numeric.hpp"
 
 
 const OperatorPtr OperatorRegistry::find(std::string_view symbol, bool is_unary) const
@@ -15,13 +16,13 @@ const OperatorPtr OperatorRegistry::find(size_t index, bool is_unary) const
 
 OperatorPtr OperatorRegistry::register_binary_operator(const std::string & symbol, Associativity associativity, Precedence precedence)
 {
-	return binary_operators.define(symbol, std::make_shared<Operator>(symbol, Fixity::F_INFIX, associativity, precedence));
+	return binary_operators.define(symbol, std::make_shared<Operator>(symbol, Fixity::F_INFIX, associativity, precedence)).second;
 	//return binary_operators.insert({ symbol, std::make_unique<Operator>(symbol, Fixity::F_INFIX, associativity, precedence) }).first->second;
 }
 
 OperatorPtr OperatorRegistry::register_unary_operator(const std::string & symbol, Fixity fixity)
 {
-	return unary_operators.define(symbol, std::make_shared<Operator>(symbol, fixity, Associativity::A_NONE, Precedence::P_UNARY));
+	return unary_operators.define(symbol, std::make_shared<Operator>(symbol, fixity, Associativity::A_NONE, Precedence::P_UNARY)).second;
 	//return unary_operators.insert({ symbol, std::make_unique<Operator>(symbol, fixity, Associativity::A_NONE, Precedence::P_UNARY) }).first->second;
 }
 
@@ -57,14 +58,17 @@ void OperatorRegistry::register_builtin_operators(void)
 
 
 	// Implementations
+	// add
+	auto add_lambda = [](const ObjectPtr & lhs, const ObjectPtr & rhs) -> ObjectPtr
+	{
+		auto lhs_num = std::dynamic_pointer_cast<INumeric>(lhs);
+		return lhs_num->add(rhs);
+	};
 	add->add_implementation(
 		Builtins::real_class,
 		Builtins::real_class,
 		std::make_shared<BuiltinOperatorImplentation>(
-			[](const ObjectPtr & lhs, const ObjectPtr & rhs) -> ObjectPtr
-			{
-				return lhs->add(rhs);
-			},
+			add_lambda,
 			Builtins::real_class
 		)
 	);
@@ -72,10 +76,7 @@ void OperatorRegistry::register_builtin_operators(void)
 		Builtins::integer_class,
 		Builtins::integer_class,
 		std::make_shared<BuiltinOperatorImplentation>(
-			[](const ObjectPtr & lhs, const ObjectPtr & rhs) -> ObjectPtr
-			{
-				return lhs->add(rhs);
-			},
+			add_lambda,
 			Builtins::integer_class
 		)
 	);

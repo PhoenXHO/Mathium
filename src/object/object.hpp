@@ -9,8 +9,8 @@
 #include <boost/multiprecision/mpfr.hpp> // for `mpfr_float`
 
 #include "util/globals.hpp" // for `globals::error_handler`
-#include "class/builtins.hpp" // for `ClassPtr`
 #include "symbol/symbol_registry.hpp"
+#include "class/property.hpp"
 
 
 using namespace boost::multiprecision;
@@ -18,15 +18,15 @@ using namespace boost::multiprecision;
 
 class Object;
 using ObjectPtr = std::shared_ptr<Object>;
-struct Variable;
-using VariablePtr = std::shared_ptr<Variable>;
+class Class;
+using ClassPtr = std::shared_ptr<Class>;
 
 
 class Object : public std::enable_shared_from_this<Object>
 {
 protected:
 	ClassPtr m_class;
-	Registry<VariablePtr> properties;
+	Registry<PropertyPtr> properties;
 
 public:
 	static ObjectPtr none;
@@ -34,23 +34,31 @@ public:
 	Object(ClassPtr cls) : m_class(cls) { init_properties(); }
 	virtual ~Object() = default;
 
-	void init_properties(void);
 
-	VariablePtr get_property(std::string_view name) const
+	#pragma region Core Interface
+	virtual std::string to_string(void) const
+	{ return ""; }
+	std::ostream & operator<<(std::ostream & os) const
+	{ return os << to_string(); }
+	#pragma endregion
+
+
+	#pragma region Property System
+	void init_properties(void);
+	PropertyPtr get_property(std::string_view name) const
 	{ return properties[name].second; }
 	void set_property(std::string_view name, const ObjectPtr & value);
-
+	#pragma endregion
+	
+	
+	#pragma region Type System
 	ClassPtr get_class(void) const { return m_class; }
 	bool is_instance_of(ClassPtr cls) const;
 	/// @brief Cast this object to the given class
 	/// @return The casted object or `nullptr` if the cast is not possible
-	virtual ObjectPtr cast_to(const ClassPtr & cls) = 0;
-
-	virtual std::string to_string(void) const = 0;
-	virtual ObjectPtr add(const ObjectPtr & rhs) const = 0;
-
-	std::ostream & operator<<(std::ostream & os) const
-	{ return os << to_string(); }
+	virtual ObjectPtr cast_to(const ClassPtr & cls)
+	{ return nullptr; }
+	#pragma endregion
 };
 
 mpfr_float add_reals(const mpfr_float & lhs, const mpfr_float & rhs);

@@ -1,4 +1,5 @@
 #include "class/class.hpp"
+#include "class/property.hpp"
 
 bool Class::is_sub_class(const ClassPtr & cls, bool strict) const
 {
@@ -38,4 +39,13 @@ int Class::measure_specificity(const ClassPtr & cls) const
 	}
 
 	return 0;
+}
+
+std::string_view Property::name(void) const
+{ return variable->name(); }
+
+void Property::set(const ObjectPtr & value)
+{
+	// For now, only allow setting the value of the property
+	variable->set(value);
 }

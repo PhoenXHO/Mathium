@@ -8,7 +8,9 @@
 #include <functional>
 
 #include "function/function_implementation.hpp"
+#include "interface/callable.hpp"
 #include "object/object.hpp"
+#include "class/builtins.hpp"
 
 
 class Function;
@@ -35,19 +37,18 @@ private:
 	int measure_specificity(const FunctionSignature & signature, const FunctionSignature & other) const;
 };
 
-class Function
+class Function : public Object
 {
-	std::string name; // Name of function
+	std::string m_name;
 	FunctionImplentationRegistry m_implementations;
 
 public:
 	Function(std::string_view name) :
-		name(name)
+		Object(Builtins::function_class),
+		m_name(name)
 	{}
 	~Function() = default;
 
-	const std::string & get_name() const
-	{ return name; }
 	FunctionImplentationRegistry & implementations()
 	{ return m_implementations; }
 	
@@ -63,5 +64,5 @@ public:
 	{ return m_implementations[index]; }
 
 	std::string to_string() const
-	{ return name + "()"; }
+	{ return "<function " + m_name + ">"; }
 };
