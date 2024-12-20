@@ -2,9 +2,6 @@
 #include "class/mathobj_class.hpp"
 
 
-void MathObjClass::init(void)
-{}
-
 ObjectPtr MathObjClass::instantiate(const std::any & value) const
 {
 	return Object::none;

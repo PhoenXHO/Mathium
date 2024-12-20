@@ -1,12 +1,10 @@
 #pragma once
 
-#include "class.hpp"
+#include "class/class.hpp"
 
 struct ReferenceClass : public Class
 {
 	ReferenceClass(void) : Class("Reference", { Builtins::mathobj_class }) {}
-
-	void init(void) override;
 
 	ObjectPtr instantiate(const std::any & value) const override;
 	ObjectPtr default_value(void) const override;

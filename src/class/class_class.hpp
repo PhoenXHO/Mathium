@@ -2,9 +2,10 @@
 
 #include "class/class.hpp"
 
-struct NoneClass : public Class
+
+struct ClassClass : public Class
 {
-	NoneClass(void) : Class("None", { Builtins::mathobj_class }) {}
+	ClassClass(void) : Class("Class", { Builtins::mathobj_class }) {}
 
 	ObjectPtr instantiate(const std::any & value) const override;
 	ObjectPtr default_value(void) const override;

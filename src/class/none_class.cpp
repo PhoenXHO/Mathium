@@ -2,9 +2,6 @@
 #include "class/none_class.hpp"
 
 
-void NoneClass::init(void)
-{}
-
 ObjectPtr NoneClass::instantiate(const std::any & value) const
 {
 	return Object::none;

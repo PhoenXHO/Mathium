@@ -1,12 +1,10 @@
 #pragma once
 
-#include "class.hpp"
+#include "class/class.hpp"
 
 struct MathObjClass : public Class
 {
 	MathObjClass(void) : Class("MathObj") {}
-
-	void init(void) override;
 
 	ObjectPtr instantiate(const std::any & value) const override;
 	ObjectPtr default_value(void) const override;

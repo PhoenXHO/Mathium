@@ -3,9 +3,6 @@
 #include "object/integer_object.hpp"
 
 
-void IntegerClass::init(void)
-{}
-
 ObjectPtr IntegerClass::instantiate(const std::any & value) const
 {
 	if (value.has_value())

@@ -1,13 +1,11 @@
 #pragma once
 
-#include "class.hpp"
+#include "class/class.hpp"
 
 
 struct RealClass : public Class
 {
-	RealClass(void) : Class("Real") {}
-
-	void init(void) override;
+	RealClass(void) : Class("Real", { Builtins::mathobj_class }) {}
 
 	ObjectPtr instantiate(const std::any & value) const override;
 	ObjectPtr default_value(void) const override;

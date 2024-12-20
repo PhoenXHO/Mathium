@@ -2,9 +2,6 @@
 #include "class/reference_class.hpp"
 
 
-void ReferenceClass::init(void)
-{}
-
 ObjectPtr ReferenceClass::instantiate(const std::any & value) const
 {
 	return Object::none;

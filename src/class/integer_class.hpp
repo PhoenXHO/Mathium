@@ -1,12 +1,10 @@
 #pragma once
 
-#include "class.hpp"
+#include "class/class.hpp"
 
 struct IntegerClass : public Class
 {
 	IntegerClass(void) : Class("Integer", { Builtins::mathobj_class }) {}
-
-	void init(void) override;
 
 	ObjectPtr instantiate(const std::any & value) const override;
 	ObjectPtr default_value(void) const override;

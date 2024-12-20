@@ -3,9 +3,6 @@
 #include "object/real_object.hpp"
 
 
-void RealClass::init(void)
-{}
-
 ObjectPtr RealClass::instantiate(const std::any & value) const
 {
 	if (value.has_value())
