@@ -44,7 +44,7 @@ class Function : public Object
 
 public:
 	Function(std::string_view name) :
-		Object(Builtins::function_class),
+		Object(builtins::function_class),
 		m_name(name)
 	{}
 	~Function() = default;

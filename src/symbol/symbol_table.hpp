@@ -4,8 +4,8 @@
 #include <unordered_map>
 #include <memory>
 
-#include "object/object.hpp" // for `MathObjPtr`
-#include "symbol/symbol_registry.hpp" // for `Registry`
+#include "object/object.hpp"
+#include "symbol/symbol_registry.hpp"
 #include "variable/variable.hpp"
 #include "function/function.hpp"
 #include "operator/operator.hpp"
@@ -39,7 +39,7 @@ public:
 	void init_builtin_functions(void);
 	void init_builtin_classes(void)
 	{
-		Builtins::init_builtin_classes(this);
+		builtins::init_builtin_classes(this);
 
 		Object::none = std::make_shared<NoneObj>();
 	}

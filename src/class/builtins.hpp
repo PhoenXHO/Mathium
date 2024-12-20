@@ -2,13 +2,10 @@
 
 #include <memory>
 
-
-class Class;
-using ClassPtr = std::shared_ptr<Class>;
-class SymbolTable;
+#include "util/forward.hpp"
 
 
-namespace Builtins
+namespace builtins
 {
 	extern ClassPtr mathobj_class; // The base class for all objects
 	extern ClassPtr class_class; // The class for class objects

@@ -145,7 +145,7 @@ void VM::run(void)
 	case OP_PRINT:
 		{
 			auto result = stack.top();
-			if (result->get_class() == Builtins::none_class)
+			if (result->get_class() == builtins::none_class)
 				break;
 
 			stack.pop();

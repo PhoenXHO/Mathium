@@ -21,10 +21,10 @@ struct FunctionSignature
 	std::vector<std::pair<std::string, ClassPtr>> parameters;
 	ClassPtr return_type;
 
-	FunctionSignature() : return_type(Builtins::none_class) {}
+	FunctionSignature() : return_type(builtins::none_class) {}
 	FunctionSignature(
 		const std::vector<std::pair<std::string, ClassPtr>> & parameters,
-		const ClassPtr & return_type = Builtins::none_class
+		const ClassPtr & return_type = builtins::none_class
 	) :
 		parameters(parameters), return_type(return_type)
 	{}

@@ -16,14 +16,3 @@ ObjectPtr RealClass::default_value(void) const
 {
 	return std::make_shared<RealObj>();
 }
-
-bool RealClass::can_cast_to(const ClassPtr & cls) const
-{
-	return cls == Builtins::real_class ||
-		   Builtins::real_class->is_sub_class(cls);
-}
-
-ObjectPtr RealClass::cast(const ObjectPtr & obj) const
-{
-	return obj->cast_to(Builtins::real_class);
-}

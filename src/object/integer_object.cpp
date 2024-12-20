@@ -2,32 +2,14 @@
 #include "object/real_object.hpp"
 
 
-ObjectPtr IntegerObj::cast_to(const ClassPtr & cls)
-{
-	if (cls == Builtins::integer_class)
-	{
-		return shared_from_this();
-	}
-	if (cls == Builtins::real_class)
-	{
-		return std::make_shared<RealObj>(
-			mpfr_float(m_value),
-			m_size,
-			0
-		);
-	}
-
-	return nullptr;
-}
-
 ObjectPtr IntegerObj::add(const ObjectPtr & rhs) const
 {
-	if (rhs->is_instance_of(Builtins::integer_class))
+	if (rhs->is_instance_of(builtins::integer_class))
 	{
 		auto rhs_int = std::dynamic_pointer_cast<IntegerObj>(rhs);
 		return std::make_shared<IntegerObj>(m_value + rhs_int->value());
 	}
-	else if (rhs->is_instance_of(Builtins::real_class))
+	else if (rhs->is_instance_of(builtins::real_class))
 	{
 		auto rhs_real = std::dynamic_pointer_cast<RealObj>(rhs);
 		return std::make_shared<RealObj>(

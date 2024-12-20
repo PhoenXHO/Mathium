@@ -4,7 +4,7 @@
 std::pair<size_t, VariablePtr> SymbolTable::define(std::string_view name, const ObjectPtr & object)
 {
 	VariablePtr variable;
-	if (object->get_class() == Builtins::reference_class)
+	if (object->get_class() == builtins::reference_class)
 	{
 		variable = std::static_pointer_cast<Variable>(object);
 	}

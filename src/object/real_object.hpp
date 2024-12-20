@@ -13,7 +13,7 @@ class RealObj : public Object, public INumeric
 
 public:
 	RealObj(std::string_view value) :
-		Object(Builtins::real_class),
+		Object(builtins::real_class),
 		m_value(value)
 	{
 		size_t dot_pos = value.find('.');
@@ -21,13 +21,13 @@ public:
 		m_decimal_part = value.size() - dot_pos - 1;
 	}
 	RealObj(const mpfr_float & value, size_t integer_part, size_t decimal_part) :
-		Object(Builtins::real_class),
+		Object(builtins::real_class),
 		m_value(value),
 		m_integer_part(integer_part),
 		m_decimal_part(decimal_part)
 	{}
 	RealObj() :
-		Object(Builtins::real_class),
+		Object(builtins::real_class),
 		m_value(0),
 		m_integer_part(1),
 		m_decimal_part(0)
@@ -40,8 +40,6 @@ public:
 	{ return m_integer_part; }
 	size_t decimal_part(void) const
 	{ return m_decimal_part; }
-
-	ObjectPtr cast_to(const ClassPtr & cls) override;
 
 	std::string to_string(void) const override
 	{

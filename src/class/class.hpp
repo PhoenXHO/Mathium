@@ -12,20 +12,17 @@
 #include "variable/variable.hpp"
 #include "symbol/symbol_registry.hpp"
 #include "class/builtins.hpp"
-
-
-struct Class;
-using ClassPtr = std::shared_ptr<Class>;
+#include "type/type.hpp"
+#include "object/object.hpp"
 
 
 struct Class : public Object
 {	
 	Class(std::string name, std::vector<ClassPtr> bases) :
-		Object(Builtins::class_class),
+		Object(builtins::class_class),
 		m_name(name),
 		bases(bases)
 	{}
-	//! Temporary fix
 	Class(std::string name) :
 		Object(nullptr),
 		m_name(name)
@@ -33,7 +30,7 @@ struct Class : public Object
 	~Class() = default;
 
 
-	#pragma region Core Interface
+#pragma region Core Interface
 	virtual void init(void)
 	{}
 	virtual std::string to_string(void) const
@@ -44,10 +41,13 @@ struct Class : public Object
 	}
 	const std::string & name(void) const
 	{ return m_name; }
-	#pragma endregion
+
+	void set_class(const ClassPtr & cls)
+	{ m_class = cls; }
+#pragma endregion
 
 
-	#pragma region Property System
+#pragma region Property System
 	Registry<PropertyPtr> & properties(void)
 	{ return m_properties; }
 
@@ -58,47 +58,33 @@ struct Class : public Object
 	{
 		m_properties.define(property->variable->name(), property);
 	}
-	#pragma endregion
+#pragma endregion
 
 
-	#pragma region Inheritance
+#pragma region Inheritance
 	bool is_sub_class(const ClassPtr & cls, bool strict = false) const;
 	/// @brief Compare the specificity of two classes.
 	/// The specificity is a measure of how well a class matches another class.
 	/// The higher the specificity, the better the match.
 	/// @return `2` if the classes are the same, `1` if this class is castable to `cls`, and `0` otherwise
-	int measure_specificity(const ClassPtr & cls) const;
-	#pragma endregion
+	int measure_specificity(const ClassPtr & target);
+#pragma endregion
 
 
-	#pragma region Type System
+#pragma region Type System
 	/// @brief Instantiate a new object of this class
 	virtual ObjectPtr instantiate(const std::any & value) const = 0;
 	/// @brief Get the default value of this class
 	virtual ObjectPtr default_value(void) const = 0;
-	virtual bool can_cast_to(const ClassPtr & cls) const = 0;
+	bool can_cast_to(const ClassPtr & target);
 	/// @brief Cast an object to this class
-	virtual ObjectPtr cast(const ObjectPtr & obj) const = 0;
-	#pragma endregion
+	ObjectPtr cast(const ObjectPtr & obj);
+#pragma endregion
 
 protected:
 	std::string m_name;
 	Registry<PropertyPtr> m_properties; // Properties of the class
+
+private:
 	std::vector<ClassPtr> bases; // Inheritance
 };
-
-
-// Hash specialization for std::pair<ClassPtr, ClassPtr>
-namespace std
-{
-	template <>
-	struct hash<std::pair<ClassPtr, ClassPtr>>
-	{
-		size_t operator()(const std::pair<ClassPtr, ClassPtr> & pair) const
-		{
-			auto hash1 = std::hash<ClassPtr>()(pair.first);
-			auto hash2 = std::hash<ClassPtr>()(pair.second);
-			return hash1 ^ (hash2 << 1);
-		}
-	};
-}

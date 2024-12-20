@@ -36,7 +36,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze(ASTNode * node)
 		}, true);
 	}
 
-	return {Builtins::none_class};
+	return {builtins::none_class};
 }
 
 SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_variable_declaration(VariableDeclarationNode * variable_declaration)
@@ -90,7 +90,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_variable_declaration(
 	}
 	variable_declaration->variable_index = index;
 
-	return {Builtins::none_class};
+	return {builtins::none_class};
 }
 
 SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_expression(ExpressionNode * expression)
@@ -120,7 +120,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_expression(Expression
 		}, true);
 	}
 
-	return {Builtins::none_class};
+	return {builtins::none_class};
 }
 
 SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_operand(OperandNode * operand)
@@ -137,7 +137,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_operand(OperandNode *
 	// If a candidate is found, return the result of the operation
 	// If no candidate is found, log an error
 	auto implentations = operand->op->implementations();
-	auto impl = implentations.find_most_specific(primary.cls, Builtins::none_class);
+	auto impl = implentations.find_most_specific(primary.cls, builtins::none_class);
 	if (impl)
 	{
 		// Store the implementation for the compiler
@@ -154,7 +154,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_operand(OperandNode *
 		}, true);
 	}
 
-	return {Builtins::none_class};
+	return {builtins::none_class};
 }
 
 SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_function_call(FunctionCallNode * function_call)
@@ -238,7 +238,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_type(TypeNode * type)
 	if (!symbol->is_class())
 	{
 		globals::error_handler.log_semantic_error({
-			"Symbol '" + std::string(type->name) + "' is not a class",
+			"Symbol '" + std::string(type->name) + "' is not a type",
 			type->location,
 			type->length
 		}, true);

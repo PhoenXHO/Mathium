@@ -1,4 +1,5 @@
 #include "class/builtins.hpp"
+#include "type/builtins.hpp"
 #include "class/mathobj_class.hpp"
 #include "class/class_class.hpp"
 #include "class/function_class.hpp"
@@ -9,7 +10,7 @@
 #include "symbol/symbol_table.hpp"
 
 
-namespace Builtins
+namespace builtins
 {
 	ClassPtr mathobj_class;
 	ClassPtr class_class;
@@ -27,7 +28,12 @@ namespace Builtins
 		class_class = std::make_shared<ClassClass>();
 		none_class = std::make_shared<NoneClass>();
 
+		// Bootstrap the classes
+		mathobj_class->set_class(class_class);
+		class_class->set_class(class_class);
+
 		// Late initialization of the classes' properties and methods
+		//TODO
 
 		function_class = std::make_shared<FunctionClass>();
 		reference_class = std::make_shared<ReferenceClass>();
@@ -45,5 +51,8 @@ namespace Builtins
 
 		integer_class->init(); symtab->define("Integer", integer_class);
 		real_class->init(); symtab->define("Real", real_class);
+
+		// Initialize the type coercions
+		builtins::init_builtin_type_coercions();
 	}
 }

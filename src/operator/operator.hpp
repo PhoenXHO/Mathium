@@ -8,11 +8,13 @@
 #include <functional>
 #include <utility> // for `std::pair`
 
-//#include "object/object.hpp" // for hash specialization of std::pair<MathObj::Type, MathObj::Type>
-#include "class/class.hpp"
+#include "util/hash.hpp"
+#include "object/object.hpp"
 #include "symbol/symbol_registry.hpp"
 
 
+struct Class;
+using ClassPtr = std::shared_ptr<Class>;
 class Operator;
 using OperatorPtr = std::shared_ptr<Operator>;
 class OperatorImplentation;
@@ -61,29 +63,32 @@ public:
 
 protected:
 	Type m_type; // Type of the operator implementation
-	ClassPtr m_result_class; // Class of the operator
+	std::pair<ClassPtr, ClassPtr> m_operand_types;
+	ClassPtr m_result_type;
 
 public:
-	OperatorImplentation(Type type, ClassPtr result_class) :
-		m_type(type), m_result_class(result_class)
+	OperatorImplentation(Type type, std::pair<ClassPtr, ClassPtr> operand_types, ClassPtr result_type) :
+		m_type(type),
+		m_operand_types(operand_types),
+		m_result_type(result_type)
 	{}
 	~OperatorImplentation() = default;
+
+	const ClassPtr & lhs_type() const
+	{ return m_operand_types.first; }
+	const ClassPtr & rhs_type() const
+	{ return m_operand_types.second; }
 
 	Type type() const
 	{ return m_type; }
 	const ClassPtr & result_class() const
-	{ return m_result_class; }
+	{ return m_result_type; }
 
 	virtual ObjectPtr execute(const ObjectPtr & lhs, const ObjectPtr & rhs) const = 0;
 	ObjectPtr operator()(const ObjectPtr & lhs, const ObjectPtr & rhs) const
 	{ return execute(lhs, rhs); }
 
-	int measure_specificity(const ClassPtr & lhs, const ClassPtr & rhs) const
-	{
-		int lhs_specificity = lhs->measure_specificity(m_result_class);
-		int rhs_specificity = rhs->measure_specificity(m_result_class);
-		return lhs_specificity * rhs_specificity;
-	}
+	int measure_specificity(const ClassPtr & lhs, const ClassPtr & rhs) const;
 };
 
 // Built-in operator implementation
@@ -92,8 +97,13 @@ class BuiltinOperatorImplentation : public OperatorImplentation
 	OperatorFunction function; // Function to execute
 
 public:
-	BuiltinOperatorImplentation(OperatorFunction function, ClassPtr result_class) :
-		OperatorImplentation(Type::O_BUILTIN, result_class), function(function)
+	BuiltinOperatorImplentation(
+		OperatorFunction function,
+		std::pair<ClassPtr, ClassPtr> operand_types,
+		ClassPtr result_class
+	) :
+		OperatorImplentation(Type::O_BUILTIN, operand_types, result_class),
+		function(function)
 	{}
 	~BuiltinOperatorImplentation() = default;
 
@@ -110,7 +120,7 @@ public:
 	OperatorImplentationRegistry() = default;
 	~OperatorImplentationRegistry() = default;
 
-	OperatorImplentationPtr define(const ClassPtr & lhs, const ClassPtr & rhs, OperatorImplentationPtr implementation);
+	OperatorImplentationPtr define(OperatorImplentationPtr implementation);
 
 	/// @brief Get the index of the operator implementation for the given operands
 	/// @return The index of the operator implementation or -1 if no implementation is found
@@ -129,6 +139,9 @@ public:
 	/// @brief Find the most specific operator implementation for the given operands
 	/// @return The most specific operator implementation or `nullptr` if no implementation is found
 	OperatorImplentationPtr find_most_specific(const ClassPtr & lhs, const ClassPtr & rhs) const;
+
+private:
+	int measure_specificity(const std::pair<ClassPtr, ClassPtr> & signature, const std::pair<ClassPtr, ClassPtr> & target) const;
 };
 
 class Operator
@@ -142,7 +155,10 @@ class Operator
 
 public:
 	Operator(const std::string & symbol, Fixity fixity, Associativity associativity, Precedence precedence) :
-		m_symbol(symbol), m_fixity(fixity), m_associativity(associativity), m_precedence(precedence)
+		m_symbol(symbol),
+		m_fixity(fixity),
+		m_associativity(associativity),
+		m_precedence(precedence)
 	{}
 	~Operator() = default;
 
@@ -157,8 +173,8 @@ public:
 	OperatorImplentationRegistry & implementations()
 	{ return m_implementations; }
 
-	void add_implementation(const ClassPtr & lhs, const ClassPtr & rhs, const OperatorImplentationPtr & implementation)
-	{ m_implementations.define(lhs, rhs, implementation); }
+	void add_implementation(const OperatorImplentationPtr & implementation)
+	{ m_implementations.define(implementation); }
 };
 
 using OperatorMap = std::unordered_map<std::string, OperatorPtr>;

@@ -11,13 +11,3 @@ ObjectPtr ReferenceClass::default_value(void) const
 {
 	return Object::none;
 }
-
-bool ReferenceClass::can_cast_to(const ClassPtr & cls) const
-{
-	return false;
-}
-
-ObjectPtr ReferenceClass::cast(const ObjectPtr & obj) const
-{
-	return Object::none;
-}

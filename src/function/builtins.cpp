@@ -9,7 +9,7 @@
 
 
 // For testing purposes
-namespace Builtins
+namespace builtins
 {
 	FunctionImplentationPtr print0 = std::make_shared<BuiltinFunctionImplentation>(
 		FunctionSignature(),
@@ -20,7 +20,7 @@ namespace Builtins
 		}
 	);
 	FunctionImplentationPtr print1 = std::make_shared<BuiltinFunctionImplentation>(
-		FunctionSignature({ { "object", Builtins::mathobj_class } }),
+		FunctionSignature({ { "object", builtins::mathobj_class } }),
 		[](const std::vector<ObjectPtr> & arguments) -> ObjectPtr
 		{
 			std::cout << arguments[0]->to_string() << std::endl;
@@ -28,7 +28,7 @@ namespace Builtins
 		}
 	);
 	FunctionImplentationPtr print2 = std::make_shared<BuiltinFunctionImplentation>(
-		FunctionSignature({ { "object1", Builtins::mathobj_class }, { "object2", Builtins::mathobj_class } }),
+		FunctionSignature({ { "object1", builtins::mathobj_class }, { "object2", builtins::mathobj_class } }),
 		[](const std::vector<ObjectPtr> & arguments) -> ObjectPtr
 		{
 			std::cout << arguments[0]->to_string() << ' ' << arguments[1]->to_string() << std::endl;
@@ -41,9 +41,9 @@ namespace Builtins
 void SymbolTable::init_builtin_functions(void)
 {
 	auto print = std::make_shared<Function>("print");
-	print->define(Builtins::print0);
-	print->define(Builtins::print1);
-	print->define(Builtins::print2);
+	print->define(builtins::print0);
+	print->define(builtins::print1);
+	print->define(builtins::print2);
 
 	define("print", print);
 }

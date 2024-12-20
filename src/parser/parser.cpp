@@ -316,11 +316,11 @@ std::unique_ptr<LiteralNode> Parser::literal_n(void)
 	switch (curr_tk->type())
 	{
 	case Token::Type::T_INTEGER_LITERAL:
-		literal->cls = Builtins::integer_class;
+		literal->cls = builtins::integer_class;
 		break;
 
 	case Token::Type::T_REAL_LITERAL:
-		literal->cls = Builtins::real_class;
+		literal->cls = builtins::real_class;
 		break;
 
 	default:

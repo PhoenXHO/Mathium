@@ -12,17 +12,17 @@ class IntegerObj : public Object, public INumeric
 
 public:
 	IntegerObj(std::string_view value) :
-		Object(Builtins::integer_class),
+		Object(builtins::integer_class),
 		m_value(value),
 		m_size(value.size())
 	{}
 	IntegerObj(const mpz_int & value) :
-		Object(Builtins::integer_class),
+		Object(builtins::integer_class),
 		m_value(value),
 		m_size(value.str().size())
 	{}
 	IntegerObj() :
-		Object(Builtins::integer_class),
+		Object(builtins::integer_class),
 		m_value(0),
 		m_size(1)
 	{}
@@ -32,8 +32,6 @@ public:
 	{ return m_value; }
 	size_t size(void) const
 	{ return m_size; }
-
-	ObjectPtr cast_to(const ClassPtr & cls) override;
 
 	std::string to_string(void) const override
 	{ return m_value.str(); }

@@ -1,5 +1,7 @@
 #include "operator/operator.hpp"
 #include "interface/numeric.hpp"
+#include "class/builtins.hpp"
+#include "class/class.hpp"
 
 
 const OperatorPtr OperatorRegistry::find(std::string_view symbol, bool is_unary) const
@@ -65,19 +67,17 @@ void OperatorRegistry::register_builtin_operators(void)
 		return lhs_num->add(rhs);
 	};
 	add->add_implementation(
-		Builtins::real_class,
-		Builtins::real_class,
 		std::make_shared<BuiltinOperatorImplentation>(
 			add_lambda,
-			Builtins::real_class
+			std::make_pair(builtins::real_class, builtins::real_class),
+			builtins::real_class
 		)
 	);
 	add->add_implementation(
-		Builtins::integer_class,
-		Builtins::integer_class,
 		std::make_shared<BuiltinOperatorImplentation>(
 			add_lambda,
-			Builtins::integer_class
+			std::make_pair(builtins::integer_class, builtins::integer_class),
+			builtins::integer_class
 		)
 	);
 }
@@ -85,9 +85,9 @@ void OperatorRegistry::register_builtin_operators(void)
 
 
 //* OperatorImplentationRegistry
-OperatorImplentationPtr OperatorImplentationRegistry::define(const ClassPtr & lhs, const ClassPtr & rhs, OperatorImplentationPtr implementation)
+OperatorImplentationPtr OperatorImplentationRegistry::define(OperatorImplentationPtr implementation)
 {
-	auto key = std::make_pair(lhs, rhs);
+	auto key = std::make_pair(implementation->lhs_type(), implementation->rhs_type());
 	indices[key] = implementations.size();
 	implementations.push_back(implementation);
 	return implementation;
@@ -117,14 +117,28 @@ OperatorImplentationPtr OperatorImplentationRegistry::find_most_specific(const C
 {
 	OperatorImplentationPtr most_specific = nullptr;
 	int highest_specificity = 0;
-	for (const auto & impl : implementations)
+	for (const auto & [key, index] : indices)
 	{
-		int specificity = impl->measure_specificity(lhs, rhs);
+		int specificity = measure_specificity({lhs, rhs}, key);
 		if (specificity > highest_specificity)
 		{
 			highest_specificity = specificity;
-			most_specific = impl;
+			most_specific = implementations[index];
 		}
 	}
 	return most_specific;
+}
+
+int OperatorImplentationRegistry::measure_specificity(const std::pair<ClassPtr, ClassPtr> & signature, const std::pair<ClassPtr, ClassPtr> & target) const
+{
+	int lhs_specificity = signature.first->measure_specificity(target.first);
+	int rhs_specificity = signature.second->measure_specificity(target.second);
+	return lhs_specificity * rhs_specificity;
+}
+
+int OperatorImplentation::measure_specificity(const ClassPtr & lhs, const ClassPtr & rhs) const
+{
+	int lhs_specificity = lhs->measure_specificity(m_result_type);
+	int rhs_specificity = rhs->measure_specificity(m_result_type);
+	return lhs_specificity * rhs_specificity;
 }

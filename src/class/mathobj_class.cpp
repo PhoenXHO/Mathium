@@ -11,13 +11,3 @@ ObjectPtr MathObjClass::default_value(void) const
 {
 	return Object::none;
 }
-
-bool MathObjClass::can_cast_to(const ClassPtr & cls) const
-{
-	return false;
-}
-
-ObjectPtr MathObjClass::cast(const ObjectPtr & obj) const
-{
-	return Object::none;
-}
