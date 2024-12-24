@@ -104,7 +104,7 @@ void VM::run(void)
 			auto function = std::dynamic_pointer_cast<Function>(symbol);
 			auto implementation = function->get_implementation(function_implementation_index);
 			
-			if (implementation->type() == FunctionImplentation::Type::F_BUILTIN)
+			if (implementation->type() == FunctionImplentation::FunctionType::F_BUILTIN)
 			{
 				auto builtin = std::dynamic_pointer_cast<BuiltinFunctionImplentation>(implementation);
 				size_t arity = builtin->arity();

@@ -7,22 +7,22 @@
 #include "util/forward.hpp"
 #include "class/builtins.hpp"
 #include "type/type_coercion.hpp"
+#include "type/type.hpp"
 
 
 /// @brief Signature of a function which consists of a list of parameters and a return type
 struct FunctionSignature
 {
-	std::vector<std::pair<std::string, ClassPtr>> parameters;
-	ClassPtr return_type;
+	std::vector<std::pair<std::string, Type>> parameters;
+	Type return_type;
 
 
 	FunctionSignature() : return_type(builtins::none_class) {}
 	FunctionSignature(
-		const std::vector<std::pair<std::string, ClassPtr>> & parameters,
-		const ClassPtr & return_type = builtins::none_class
-	) :
-		parameters(parameters), return_type(return_type)
-	{}
+		const std::vector<std::pair<std::string, Type>> & parameters,
+		const Type & return_type = Type(builtins::none_class)
+	)	: parameters(parameters)
+		, return_type(return_type) {}
 	~FunctionSignature() = default;
 
 	size_t arity(void) const
@@ -35,7 +35,7 @@ struct FunctionSignature
 
 		for (size_t i = 0; i < parameters.size(); ++i)
 		{
-			if (parameters[i].second != other.parameters[i].second)
+			if (parameters[i].second.cls != other.parameters[i].second.cls)
 				return false;
 		}
 
@@ -44,7 +44,7 @@ struct FunctionSignature
 		return true;
 	}
 
-	TypeCoercion::MatchResult match_arguments(const std::vector<std::pair<std::string, ClassPtr>> & arguments) const;
+	TypeCoercion::MatchResult match_arguments(const std::vector<std::pair<std::string, Type>> & arguments) const;
 
 	std::string to_string(bool parameters_only = false) const;
 };

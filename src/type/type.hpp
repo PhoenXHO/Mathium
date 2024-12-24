@@ -1,6 +1,9 @@
 #pragma once
 
-#include "util/forward.hpp"
+#include <string>
+
+#include "class/class.hpp"
+#include "class/builtins.hpp"
 
 
 struct Type
@@ -13,4 +16,16 @@ struct Type
 		: cls(cls)
 		, is_const(is_const)
 		, is_ref(is_ref) {}
+
+	std::string to_string(void) const
+	{
+		std::string str = cls->name();
+		if (cls == builtins::none_class)
+			return str;
+		if (is_const)
+			str = "const " + str;
+		if (is_ref)
+			str = "ref " + str;
+		return str;
+	}
 };

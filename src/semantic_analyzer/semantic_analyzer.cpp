@@ -140,7 +140,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_expression(Expression
 			"No operator implementation found for the given operands",
 			expression->op->location,
 			expression->op->length,
-			"Got: " + left.cls->to_string() + " and " + right.cls->to_string()
+			"Got: '" + left.to_string() + "' and '" + right.to_string() + '\''
 		}, true);
 	}
 
@@ -174,7 +174,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_operand(OperandNode *
 			"No operator implementation found for the given operand",
 			operand->op->location,
 			operand->op->length,
-			"Got: " + primary.cls->to_string()
+			"Got: '" + primary.to_string() + '\''
 		}, true);
 	}
 
@@ -234,7 +234,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_function_call(Functio
 				auto & from = signature.parameters[i].second;
 				auto & to = function->get_implementation(match->index)->signature().parameters[i].second;
 				globals::error_handler.log_warning({
-					"Lossy conversion from '" + from->name() + "' to '" + to->name() + "'",
+					"Lossy conversion from '" + from.to_string() + "' to '" + to.to_string() + "'",
 					function_call->arguments[i]->location,
 					function_call->arguments[i]->length
 				});
@@ -245,7 +245,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_function_call(Functio
 	// Store the index of the function and the match conversions for the compiler
 	function_call->function_index = index;
 	function_call->match = match;
-	return function->get_implementation(match->index)->return_class();
+	return function->get_implementation(match->index)->return_type();
 }
 
 SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_identifier(IdentifierNode * identifier)

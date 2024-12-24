@@ -21,7 +21,7 @@ protected:
 	FunctionSignature m_signature;
 
 public:
-	enum class Type
+	enum class FunctionType
 	{
 		F_BUILTIN, // Built-in function
 		F_USER_DEFINED // User-defined function
@@ -32,13 +32,15 @@ public:
 	{}
 	virtual ~FunctionImplentation() = default;
 
-	virtual Type type() const = 0;
+	virtual FunctionType type() const = 0;
 
 	FunctionSignature signature() const
 	{ return m_signature; }
 	size_t arity() const
 	{ return m_signature.arity(); }
-	ClassPtr return_class() const
+	//ClassPtr return_class() const
+	//{ return m_signature.return_type; }
+	const Type & return_type() const
 	{ return m_signature.return_type; }
 
 	ObjectPtr operator()(const std::vector<ObjectPtr> & arguments) const
@@ -59,8 +61,8 @@ public:
 	{}
 	~BuiltinFunctionImplentation() = default;
 
-	Type type() const override
-	{ return Type::F_BUILTIN; }
+	FunctionType type() const override
+	{ return FunctionType::F_BUILTIN; }
 
 	ObjectPtr call(const std::vector<ObjectPtr> & arguments) const override
 	{ return m_function(arguments); }

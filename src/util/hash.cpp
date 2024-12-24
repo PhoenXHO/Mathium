@@ -36,7 +36,7 @@ namespace std
 		for (const auto & param : signature.parameters)
 		{
 			// We only need to hash the class pointer
-			hash ^= std::hash<ClassPtr>{}(param.second) + 0x9e3779b9 + (hash << 6) + (hash >> 2); // Boost's hash_combine
+			hash ^= std::hash<Type>{}(param.second) + 0x9e3779b9 + (hash << 6) + (hash >> 2); // Boost's hash_combine
 		}
 		// We don't need to hash the return type because a function signature is uniquely identified by its parameters
 		// We'll do the lookup in the registry using the parameters only

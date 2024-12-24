@@ -2,7 +2,7 @@
 #include "class/class.hpp"
 
 
-TypeCoercion::MatchResult FunctionSignature::match_arguments(const std::vector<std::pair<std::string, ClassPtr>> & arguments) const
+TypeCoercion::MatchResult FunctionSignature::match_arguments(const std::vector<std::pair<std::string, Type>> & arguments) const
 {
 	if (arguments.size() != parameters.size())
 		return {TypeCoercion::MatchLevel::INCOMPATIBLE, {}};
@@ -12,8 +12,8 @@ TypeCoercion::MatchResult FunctionSignature::match_arguments(const std::vector<s
 
 	for (size_t i = 0; i < parameters.size(); ++i)
 	{
-		auto & from = parameters[i].second;
-		auto & to = arguments[i].second;
+		auto & from = parameters[i].second.cls;
+		auto & to = arguments[i].second.cls;
 		auto path = TypeCoercion::instance().find_best_coercion_path(from, to);
 		if (path->effective_match_level == TypeCoercion::MatchLevel::INCOMPATIBLE)
 			return {TypeCoercion::MatchLevel::INCOMPATIBLE, {}};
@@ -32,12 +32,12 @@ std::string FunctionSignature::to_string(bool parameters_only) const
 	{
 		if (i > 0)
 			str += ", ";
-		str += parameters[i].second->to_string();
+		str += parameters[i].second.to_string();
 	}
 	str += ")";
 	if (!parameters_only)
 	{
-		str += " -> " + return_type->to_string();
+		str += " -> " + return_type.to_string();
 	}
 	return str;
 }

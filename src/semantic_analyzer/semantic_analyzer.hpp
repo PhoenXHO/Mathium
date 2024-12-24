@@ -8,6 +8,7 @@
 #include "class/class.hpp"
 #include "type/type.hpp"
 
+
 // This class will be responsible for type checking and other semantic analysis tasks
 class SemanticAnalyzer
 {
