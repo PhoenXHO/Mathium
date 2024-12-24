@@ -11,13 +11,23 @@
 #include "interface/callable.hpp"
 #include "object/object.hpp"
 #include "class/builtins.hpp"
+#include "type/type.hpp"
+#include "symbol/symbol.hpp"
 
 
 class Function;
 using FunctionPtr = std::shared_ptr<Function>;
 
+
 struct FunctionImplentationRegistry
 {
+	struct ImplementationMatch
+	{
+		size_t index; // Index of the implementation
+		TypeCoercion::MatchResult conversion; // Conversion result
+	};
+	using ImplementationMatchPtr = std::shared_ptr<ImplementationMatch>;
+
 	std::unordered_map<FunctionSignature, size_t> implementation_indices;
 	std::vector<FunctionImplentationPtr> implementations;
 
@@ -25,29 +35,40 @@ struct FunctionImplentationRegistry
 	~FunctionImplentationRegistry() = default;
 
 	FunctionImplentationPtr define(const FunctionImplentationPtr & implementation);
-	/// @brief Find the most specific implementation of the function for the given signature
-	/// @return A pair containing the index of the implementation of the function
-	/// and the implementation itself, or `{ -1, nullptr }` if no implementation is found
-	std::pair<size_t, FunctionImplentationPtr> find_most_specific(const FunctionSignature & signature) const;
+	ImplementationMatchPtr find_best_match(const FunctionSignature & signature);
 
 	FunctionImplentationPtr operator[](size_t index) const
 	{ return implementations[index]; }
 
-private:
-	int measure_specificity(const FunctionSignature & signature, const FunctionSignature & other) const;
+	std::string to_string() const
+	{
+		std::string str = "{\n";
+		for (const auto & impl : implementations)
+		{
+			str += "  " + impl->signature().to_string() + "\n";
+		}
+		str += "}";
+		return str;
+	}
 };
 
-class Function : public Object
+class Function : public Object, public Symbol
 {
-	std::string m_name;
 	FunctionImplentationRegistry m_implementations;
 
 public:
-	Function(std::string_view name) :
-		Object(builtins::function_class),
-		m_name(name)
-	{}
+	Function(std::string_view name)
+		: Object(builtins::function_class)
+		, Symbol(name) {}
 	~Function() = default;
+
+
+	Type get_symbol_type() const override
+	{ return Type::S_FUNCTION; }
+
+	ClassPtr get_class() const override
+	{ return builtins::function_class; }
+
 
 	FunctionImplentationRegistry & implementations()
 	{ return m_implementations; }
@@ -55,10 +76,8 @@ public:
 	FunctionImplentationPtr define(const FunctionImplentationPtr & implementation)
 	{ return m_implementations.define(implementation); }
 
-	/// @brief Find the most specific implementation of the function for the given signature
-	/// @return The most specific implementation of the function or `nullptr` if no implementation is found
-	std::pair<size_t, FunctionImplentationPtr> find_implentation(const FunctionSignature & signature) const
-	{ return m_implementations.find_most_specific(signature); }
+	FunctionImplentationRegistry::ImplementationMatchPtr find_best_match(const FunctionSignature & signature)
+	{ return m_implementations.find_best_match(signature); }
 
 	FunctionImplentationPtr get_implementation(size_t index) const
 	{ return m_implementations[index]; }

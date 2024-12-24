@@ -6,9 +6,9 @@
 #include "class/class.hpp"
 
 
-void TypeCoercion::add_rule(ClassPtr from, ClassPtr to, CoercionFunction converter, int cost)
+void TypeCoercion::add_rule(ClassPtr from, ClassPtr to, CoercionFunction converter, MatchLevel match_level)
 {
-	rules[{ from, to }] = { converter, cost };
+	rules[{ from, to }] = { converter, match_level };
 }
 
 ObjectPtr TypeCoercion::coerce(const ObjectPtr & obj, ClassPtr to) const
@@ -18,7 +18,6 @@ ObjectPtr TypeCoercion::coerce(const ObjectPtr & obj, ClassPtr to) const
 	{
 		return rule->second.converter(obj);
 	}
-
 	return nullptr;
 }
 
@@ -32,44 +31,47 @@ bool TypeCoercion::can_coerce(const ObjectPtr & obj, ClassPtr to) const
 	return can_coerce(obj->get_class(), to);
 }
 
-int TypeCoercion::get_cost(const ClassPtr & from, ClassPtr to) const
+TypeCoercion::MatchLevel TypeCoercion::get_match_level(const ClassPtr & from, ClassPtr to) const
 {
 	auto rule = rules.find({ from, to });
 	if (rule != rules.end())
 	{
-		return rule->second.cost;
+		return rule->second.match_level;
 	}
-
-	return -1;
+	return MatchLevel::INCOMPATIBLE;
 }
 
 TypeCoercion::CoercionPathPtr TypeCoercion::find_best_coercion_path(const ClassPtr & from, const ClassPtr & to) const
 {
 	// Direct conversion
 	if (from == to)
-		return std::make_shared<CoercionPath>(CoercionPath{ {}, 0 });
+		return std::make_shared<CoercionPath>(CoercionPath{ {}, MatchLevel::EXACT });
 
 	// Check if the path is already cached
 	if (m_path_index_cache.contains({ from, to }))
 		return m_path_cache[m_path_index_cache[{ from, to }]];
 
+	// Check if there is an inheritance match
+	if (from->is_sub_class(to))
+		return std::make_shared<CoercionPath>(CoercionPath{ {}, MatchLevel::INHERITANCE });
+
 	// Dijkstra's algorithm
-	std::unordered_map<ClassPtr, int> distances;
+	std::unordered_map<ClassPtr, MatchLevel> best_matches;
 	std::unordered_map<ClassPtr, std::pair<ClassPtr, CoercionFunction>> previous;
 	std::priority_queue<
-		std::pair<int, ClassPtr>,
-		std::vector<std::pair<int, ClassPtr>>,
-		std::greater<>
+		std::pair<MatchLevel, ClassPtr>,
+		std::vector<std::pair<MatchLevel, ClassPtr>>,
+		std::less<> // Order is reversed (best match level last)
 	> queue;
 
 	// Set the initial distance
-	distances[from] = 0;
-	queue.push({ 0, from });
+	best_matches[from] = MatchLevel::EXACT;
+	queue.push({ MatchLevel::EXACT, from });
 
 	while (!queue.empty())
 	{
 		// Get the current node
-		auto [distance, current] = queue.top();
+		auto [current_level, current] = queue.top();
 		queue.pop();
 
 		// Found the target
@@ -77,7 +79,7 @@ TypeCoercion::CoercionPathPtr TypeCoercion::find_best_coercion_path(const ClassP
 		{
 			// Reconstruct the path
 			CoercionPath path;
-			path.total_cost = distance;
+			path.effective_match_level = current_level;
 			
 			ClassPtr _current = to;
 			while (_current != from)
@@ -90,6 +92,7 @@ TypeCoercion::CoercionPathPtr TypeCoercion::find_best_coercion_path(const ClassP
 			std::reverse(path.steps.begin(), path.steps.end());
 			// Cache the path
 			cache_path(from, to, std::make_shared<CoercionPath>(path));
+			// Return the last element (the one with the highest match level)
 			return m_path_cache.back();
 		}
 
@@ -102,23 +105,38 @@ TypeCoercion::CoercionPathPtr TypeCoercion::find_best_coercion_path(const ClassP
 			if (cls != current)
 				continue;
 
-			int new_distance = distance + rule.cost;
-			// Update the distance if it is shorter
-			if (!distances.contains(next) || new_distance < distances[next])
+			// Combine the match levels
+			MatchLevel new_level = current_level | rule.match_level;
+			// Update the match level if it is better
+			if (!best_matches.contains(next) || new_level > best_matches[next])
 			{
-				distances[next] = new_distance;
+				best_matches[next] = new_level;
 				previous[next] = { current, rule.converter };
-				queue.push({ new_distance, next });
+				queue.push({ new_level, next });
 			}
 		}
 	}
 
 	// No path found
-	return std::make_shared<CoercionPath>(CoercionPath{ {}, -1 });
+	return std::make_shared<CoercionPath>(CoercionPath{ {}, MatchLevel::INCOMPATIBLE });
 }
 
-void TypeCoercion::cache_path(const ClassPtr & from, const ClassPtr & to, const CoercionPathPtr & path) const
+size_t TypeCoercion::cache_path(const ClassPtr & from, const ClassPtr & to, const CoercionPathPtr & path) const
 {
 	m_path_index_cache[{ from, to }] = m_path_cache.size();
 	m_path_cache.push_back(path);
+	return m_path_cache.size() - 1;
+}
+
+size_t TypeCoercion::cache_path(const CoercionPathPtr & path) const
+{
+	m_path_cache.push_back(path);
+	return m_path_cache.size() - 1;
+}
+
+TypeCoercion::MatchLevel operator|(TypeCoercion::MatchLevel a, TypeCoercion::MatchLevel b)
+{
+	return static_cast<TypeCoercion::MatchLevel>(
+		std::min(static_cast<int>(a), static_cast<int>(b))
+	);
 }

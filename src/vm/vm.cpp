@@ -91,8 +91,7 @@ void VM::run(void)
 		{
 			auto index = READ_BYTE();
 			auto symbol = current_scope->get_symbol(index);
-			auto variable = std::dynamic_pointer_cast<Variable>(symbol);
-			stack.push(variable->value());
+			stack.push(Symbol::get_symbol_value(symbol));
 		}
 		break;
 
@@ -102,8 +101,7 @@ void VM::run(void)
 			auto function_implementation_index = READ_BYTE();
 
 			auto symbol = current_scope->get_symbol(function_index);
-			auto function_reference = std::dynamic_pointer_cast<Variable>(symbol);
-			auto function = std::dynamic_pointer_cast<Function>(function_reference->value());
+			auto function = std::dynamic_pointer_cast<Function>(symbol);
 			auto implementation = function->get_implementation(function_implementation_index);
 			
 			if (implementation->type() == FunctionImplentation::Type::F_BUILTIN)

@@ -213,7 +213,7 @@ void Compiler::compile_function_call(const FunctionCallNode * function_call_n)
 		}, true);
 		return;
 	}
-	size_t impl_index = function_call_n->function_implementation_index;
+	size_t impl_index = function_call_n->match->index;
 	if (impl_index >= UINT8_MAX)
 	{
 		// We have reached the maximum number of function implementations
@@ -225,9 +225,18 @@ void Compiler::compile_function_call(const FunctionCallNode * function_call_n)
 		return;
 	}
 
-	for (const auto & argument : function_call_n->arguments)
+	auto & match = function_call_n->match;
+	for (size_t i = 0; i < function_call_n->arguments.size(); ++i)
 	{
-		compile_expression(argument.get());
+		compile_expression(function_call_n->arguments[i].get());
+		// Check if the argument needs to be coerced
+		if (match->conversion.conversions[i]->effective_match_level != TypeCoercion::MatchLevel::EXACT)
+		{
+			size_t coercion_index = TypeCoercion::instance().cache_path(
+				match->conversion.conversions[i]
+			);
+			chunk.emit(OP_COERCE, coercion_index);
+		}
 	}
 
 	chunk.emit(OP_CALL_FUNCTION, index, impl_index);

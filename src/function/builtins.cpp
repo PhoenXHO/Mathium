@@ -6,6 +6,7 @@
 #include "class/builtins.hpp"
 #include "function/function.hpp"
 #include "symbol/symbol_table.hpp"
+#include "object/integer_object.hpp"
 
 
 void SymbolTable::init_builtin_functions(void)
@@ -41,4 +42,21 @@ void SymbolTable::init_builtin_functions(void)
 	print->define(print2);
 
 	define("print", print);
+
+
+
+	FunctionImplentationPtr func = std::make_shared<BuiltinFunctionImplentation>(
+		FunctionSignature({ { "x", builtins::integer_class }, { "y", builtins::integer_class } }, builtins::integer_class),
+		[](const std::vector<ObjectPtr> & arguments) -> ObjectPtr
+		{
+			auto x = std::dynamic_pointer_cast<IntegerObj>(arguments[0]);
+			auto y = std::dynamic_pointer_cast<IntegerObj>(arguments[1]);
+			return std::make_shared<IntegerObj>(x->value() + y->value());
+		}
+	);
+
+	auto add = std::make_shared<Function>("add");
+	add->define(func);
+
+	define("add", add);
 }

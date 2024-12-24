@@ -14,20 +14,26 @@
 #include "class/builtins.hpp"
 #include "type/type.hpp"
 #include "object/object.hpp"
+#include "symbol/symbol.hpp"
 
 
-struct Class : public Object
+struct Class : public Object, public Symbol
 {	
-	Class(std::string name, std::vector<ClassPtr> bases) :
-		Object(builtins::class_class),
-		m_name(name),
-		bases(bases)
-	{}
-	Class(std::string name) :
-		Object(nullptr),
-		m_name(name)
-	{}
+	Class(std::string name, std::vector<ClassPtr> bases)
+		: Object(builtins::class_class)
+		, Symbol(name)
+		, bases(bases) {}
+	Class(std::string name)
+		: Object(nullptr)
+		, Symbol(name) {}
 	~Class() = default;
+
+
+	Symbol::Type get_symbol_type() const override
+	{ return Symbol::Type::S_CLASS; }
+
+	ClassPtr get_class() const override
+	{ return builtins::class_class; }
 
 
 #pragma region Core Interface
@@ -82,7 +88,6 @@ struct Class : public Object
 #pragma endregion
 
 protected:
-	std::string m_name;
 	Registry<PropertyPtr> m_properties; // Properties of the class
 
 private:

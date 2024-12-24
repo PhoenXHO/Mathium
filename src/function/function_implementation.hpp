@@ -10,16 +10,19 @@
 #include "interface/callable.hpp"
 #include "class/class.hpp"
 #include "class/builtins.hpp"
+#include "type/type.hpp"
 
 
 class FunctionImplentation;
 using FunctionImplentationPtr = std::shared_ptr<FunctionImplentation>;
+
 
 /// @brief Signature of a function which consists of a list of parameters and a return type
 struct FunctionSignature
 {
 	std::vector<std::pair<std::string, ClassPtr>> parameters;
 	ClassPtr return_type;
+
 
 	FunctionSignature() : return_type(builtins::none_class) {}
 	FunctionSignature(
@@ -44,11 +47,12 @@ struct FunctionSignature
 				return false;
 		}
 
-		// We don't need to compare the return type because a function signature is uniquely identified by its parameters
+		// We don't need to compare the return type because a function signature
+		// is uniquely identified by its parameters
 		return true;
 	}
 
-	int measure_specificity(const FunctionSignature & other) const;
+	TypeCoercion::MatchResult match_arguments(const std::vector<std::pair<std::string, ClassPtr>> & arguments) const;
 
 	std::string to_string(bool parameters_only = false) const;
 };
@@ -81,9 +85,6 @@ public:
 
 	ObjectPtr operator()(const std::vector<ObjectPtr> & arguments) const
 	{ return call(arguments); }
-
-	int measure_specificity(const FunctionSignature & signature) const
-	{ return m_signature.measure_specificity(signature); }
 };
 
 class BuiltinFunctionImplentation : public FunctionImplentation

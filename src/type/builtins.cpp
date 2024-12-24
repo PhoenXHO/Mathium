@@ -2,6 +2,7 @@
 #include "class/builtins.hpp"
 #include "object/integer_object.hpp"
 #include "object/real_object.hpp"
+#include "function/function.hpp"
 
 
 std::shared_ptr<TypeCoercion> TypeCoercion::m_instance = nullptr;
@@ -22,7 +23,19 @@ namespace builtins
 					integer->size(),
 					0
 				);
-			}
+			},
+			TypeCoercion::MatchLevel::LOSSLESS
+		);
+
+		// Real -> Integer
+		TypeCoercion::instance().add_rule(
+			builtins::real_class, builtins::integer_class,
+			[](const ObjectPtr & obj) -> ObjectPtr
+			{
+				auto real = std::static_pointer_cast<RealObj>(obj);
+				return std::make_shared<IntegerObj>(mpz_int(real->value()));
+			},
+			TypeCoercion::MatchLevel::LOSSY
 		);
 	}
 }

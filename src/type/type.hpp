@@ -9,27 +9,41 @@
 #include "util/forward.hpp"
 
 
+struct Type
+{
+	ClassPtr type;
+	bool is_const;
+	bool is_ref;
+};
+
 class TypeCoercion
 {
 public:
 	TypeCoercion() = default;
 	~TypeCoercion() = default;
 
+	/// @brief Match level of a coercion rule
+	/// Lower values are worse matches
+	enum class MatchLevel
+	{
+		EXACT = 3,        // Exact match
+		LOSSLESS = 2,     // Good match - e.g. `Integer -> Real`
+		INHERITANCE = 1,  // Good match
+		LOSSY = 0,        // Lossy conversion - e.g. `Real -> Integer`
+		INCOMPATIBLE = -1 // No conversion possible
+	};
+
 	using CoercionFunction = std::function<ObjectPtr(const ObjectPtr &)>;
 	struct Rule
 	{
 		CoercionFunction converter;
-		// The cost of the coercion - lower is more preferred
-		// 0 - exact match
-		// 1 - lossless conversion
-		// 2 - lossy conversion
-		int cost;
+		MatchLevel match_level;
 	};
 
 	struct CoercionPath
 	{
 		std::vector<CoercionFunction> steps;
-		int total_cost;
+		MatchLevel effective_match_level; // Worst match level in the path
 
 		ObjectPtr apply(const ObjectPtr & obj) const
 		{
@@ -43,18 +57,23 @@ public:
 	};
 	using CoercionPathPtr = std::shared_ptr<CoercionPath>;
 
+	/// @brief Result of a match between multiple pairs of types
+	struct MatchResult
+	{
+		MatchLevel match_level;
+		std::vector<CoercionPathPtr> conversions;
+	};
+
 
 	CoercionPathPtr find_best_coercion_path(const ClassPtr & from, const ClassPtr & to) const;
 
 private:
-	std::unordered_map<std::pair<ClassPtr, ClassPtr>, Rule> rules;
 	static std::shared_ptr<TypeCoercion> m_instance; // Singleton instance
+
+	std::unordered_map<std::pair<ClassPtr, ClassPtr>, Rule> rules;
 
 	mutable std::unordered_map<std::pair<ClassPtr, ClassPtr>, size_t> m_path_index_cache;
 	mutable std::vector<CoercionPathPtr> m_path_cache;
-
-
-	void cache_path(const ClassPtr & from, const ClassPtr & to, const CoercionPathPtr & path) const;
 
 public:
 	// Singleton instance
@@ -68,11 +87,11 @@ public:
 	}
 
 
-	void add_rule(ClassPtr from, ClassPtr to, CoercionFunction coercion, int cost = 1);
+	void add_rule(ClassPtr from, ClassPtr to, CoercionFunction coercion, MatchLevel match_level);
 	ObjectPtr coerce(const ObjectPtr & obj, ClassPtr to) const;
 	bool can_coerce(const ClassPtr & from, ClassPtr to) const;
 	bool can_coerce(const ObjectPtr & obj, ClassPtr to) const;
-	int get_cost(const ClassPtr & from, ClassPtr to) const;
+	MatchLevel get_match_level(const ClassPtr & from, ClassPtr to) const;
 
 	size_t get_path_index(const ClassPtr & from, const ClassPtr & to) const
 	{ return m_path_index_cache.at({ from, to }); }
@@ -82,4 +101,11 @@ public:
 
 	size_t get_path_cache_size(void) const
 	{ return m_path_cache.size(); }
+
+
+	size_t cache_path(const ClassPtr & from, const ClassPtr & to, const CoercionPathPtr & path) const;
+	size_t cache_path(const CoercionPathPtr & path) const;
 };
+
+// Operator to combine match levels (worst match level)
+TypeCoercion::MatchLevel operator|(TypeCoercion::MatchLevel a, TypeCoercion::MatchLevel b);

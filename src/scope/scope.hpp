@@ -23,16 +23,16 @@ struct Scope
 	/// @brief Find the symbol in the current scope or any of its parents
 	/// @return A pair containing the index of the symbol in the symbol table and the symbol itself,
 	/// or `{ -1, nullptr }` if the symbol is not defined
-	std::pair<size_t, VariablePtr> find_symbol(std::string_view name) const;
+	std::pair<size_t, SymbolPtr> find_symbol(std::string_view name) const;
 
-	VariablePtr get_symbol(size_t index) const
+	SymbolPtr get_symbol(size_t index) const
 	{ return symbols.get(index); }
 
 	bool is_symbol_defined(std::string_view name) const
 	{ return symbols.find(name).first != -1; }
 
-	std::pair<size_t, VariablePtr> define_variable(std::string_view name, ClassPtr cls);
-	std::pair<size_t, VariablePtr> define_variable(std::string_view name, ObjectPtr value = Object::none);
+	std::pair<size_t, SymbolPtr> define_variable(std::string_view name, ClassPtr cls);
+	std::pair<size_t, SymbolPtr> define_variable(std::string_view name, ObjectPtr value = Object::none);
 	#pragma endregion
 
 

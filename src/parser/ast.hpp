@@ -10,6 +10,7 @@
 #include "util/util.hpp"
 #include "class/class.hpp"
 #include "type/type.hpp"
+#include "function/function.hpp"
 
 
 struct AST;
@@ -164,7 +165,7 @@ struct FunctionCallNode : public ASTNode
 	std::unique_ptr<IdentifierNode> identifier;
 	std::vector<std::unique_ptr<ASTNode>> arguments;
 	size_t function_index = 0;
-	size_t function_implementation_index = 0;
+	FunctionImplentationRegistry::ImplementationMatchPtr match;
 
 	FunctionCallNode() : ASTNode(Type::N_FUNCTION_CALL) {}
 	~FunctionCallNode() = default;

@@ -8,44 +8,22 @@ FunctionImplentationPtr FunctionImplentationRegistry::define(const FunctionImple
 	return implementation;
 }
 
-std::pair<size_t, FunctionImplentationPtr> FunctionImplentationRegistry::find_most_specific(const FunctionSignature & signature) const
+FunctionImplentationRegistry::ImplementationMatchPtr FunctionImplentationRegistry::find_best_match(const FunctionSignature & signature)
 {
-	FunctionImplentationPtr most_specific;
-	size_t most_specific_index = -1;
-	int most_specific_specificity = -1;
+	ImplementationMatchPtr best_match = std::make_shared<ImplementationMatch>(ImplementationMatch{
+		0, {TypeCoercion::MatchLevel::INCOMPATIBLE, {}}
+	});
 
 	for (size_t i = 0; i < implementations.size(); ++i)
 	{
 		const auto & impl = implementations[i];
-		int specificity = measure_specificity(signature, impl->signature());
-		if (specificity > most_specific_specificity)
+		auto conversion = signature.match_arguments(impl->signature().parameters);
+		if (conversion.match_level > best_match->conversion.match_level)
 		{
-			most_specific = impl;
-			most_specific_index = i;
-			most_specific_specificity = specificity;
+			best_match->index = i;
+			best_match->conversion = conversion;
 		}
 	}
 
-	return { most_specific_index, most_specific };
-}
-
-int FunctionImplentationRegistry::measure_specificity(const FunctionSignature & signature, const FunctionSignature & other) const
-{
-	if (signature == other)
-		return 0;
-
-	if (signature.parameters.size() != other.parameters.size())
-		return -1;
-
-	int specificity = 0;
-	for (size_t i = 0; i < signature.parameters.size(); ++i)
-	{
-		if (signature.parameters[i].second == other.parameters[i].second)
-			++specificity;
-	}
-
-	if (signature.return_type == other.return_type)
-		++specificity;
-
-	return specificity;
+	return best_match;
 }

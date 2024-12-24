@@ -3,28 +3,35 @@
 
 #include "object/object.hpp"
 #include "class/builtins.hpp"
+#include "symbol/symbol.hpp"
 
 
 struct Variable;
 using VariablePtr = std::shared_ptr<Variable>;
 
 
-struct Variable : public Object
+struct Variable : public Symbol
 {
 	bool static_type = false;
 
-	Variable(std::string_view name, ObjectPtr value) :
-		Object(builtins::reference_class),
-		m_name(name),
-		m_value(value)
-	{}
+	Variable(std::string_view name, ObjectPtr value)
+		: Symbol(name)
+		, m_value(value) {}
 	Variable(std::string_view name, ClassPtr cls);
 	~Variable() = default;
 
-	std::string to_string(void) const override;
+
+	Type get_symbol_type() const override
+	{ return Type::S_VARIABLE; }
+
+	ClassPtr get_class() const override
+	{ return m_value ? m_value->get_class() : builtins::none_class; }
+
 
 	std::string name(void) const
 	{ return m_name; }
+
+	std::string to_string(void) const;
 
 	void set(ObjectPtr value)
 	{ this->m_value = value; }
@@ -35,12 +42,6 @@ struct Variable : public Object
 	ClassPtr value_class(void) const
 	{ return m_value ? m_value->get_class() : builtins::none_class; }
 
-	//ObjectPtr cast_to(const ClassPtr & cls) override
-	//{ return m_value->cast_to(cls); }
-
-	bool is_reference(void) const
-	{ return m_value->get_class() == builtins::reference_class; }
-
 	bool is_function(void) const
 	{ return m_value->get_class() == builtins::function_class; }
 
@@ -48,7 +49,6 @@ struct Variable : public Object
 	{ return m_value->get_class() == builtins::class_class; }
 
 private:
-	std::string m_name;
 	ObjectPtr m_value;
 };
 

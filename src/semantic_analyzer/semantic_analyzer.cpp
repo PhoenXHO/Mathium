@@ -70,14 +70,8 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_variable_declaration(
 			// Try to find a coercion path
 			auto coercion_path = TypeCoercion::instance().find_best_coercion_path(result.cls, type);
 
-			// If a coercion path is found, use it
-			if (coercion_path->total_cost != -1)
-			{
-				// Store the coercion path index for the compiler
-				variable_declaration->coercion_index = TypeCoercion::instance().get_path_index(result.cls, type);
-				variable_declaration->needs_coercion = true;
-			}
-			else
+			// If the coercion path is incompatible, log an error
+			if (coercion_path->effective_match_level == TypeCoercion::MatchLevel::INCOMPATIBLE)
 			{
 				globals::error_handler.log_semantic_error({
 					"Cannot convert '" + result.cls->name() + "' to '" + type->name() + "'",
@@ -85,6 +79,25 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_variable_declaration(
 					variable_declaration->expression->length
 				}, true);
 			}
+
+			// If the coercion is lossy, log a warning
+			if (coercion_path->effective_match_level == TypeCoercion::MatchLevel::LOSSY)
+			{
+				globals::error_handler.log_warning({
+					"Lossy conversion from '" + result.cls->name() + "' to '" + type->name() + "'",
+					variable_declaration->expression->location,
+					variable_declaration->expression->length
+				});
+			}
+
+			// If the match level is not exact, store the coercion path index for the compiler
+			if (coercion_path->effective_match_level != TypeCoercion::MatchLevel::EXACT)
+			{
+				variable_declaration->coercion_index = TypeCoercion::instance().get_path_index(result.cls, type);
+				variable_declaration->needs_coercion = true;
+			}
+
+			// If the match level is exact, the coercion is not needed
 		}
 	}
 
@@ -179,7 +192,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_function_call(Functio
 			function_call->identifier->length
 		}, true);
 	}
-	else if (!symbol->is_function())
+	else if (symbol->get_symbol_type() != Symbol::Type::S_FUNCTION)
 	{
 		globals::error_handler.log_semantic_error({
 			"Symbol '" + std::string(function_call->identifier->name) + "' is not a function",
@@ -188,8 +201,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_function_call(Functio
 		}, true);
 	}
 
-	auto function_reference = std::dynamic_pointer_cast<Variable>(symbol);
-	auto function = std::dynamic_pointer_cast<Function>(function_reference->value());
+	auto function = std::dynamic_pointer_cast<Function>(symbol);
 	
 	// Analyze the arguments
 	FunctionSignature signature;
@@ -200,21 +212,40 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_function_call(Functio
 	}
 
 	// Find the most specific implementation of the function for the given signature
-	auto impl = function->find_implentation(signature);
-	if (!impl.second)
+	auto match = function->find_best_match(signature);
+	if (match->conversion.match_level == TypeCoercion::MatchLevel::INCOMPATIBLE)
 	{
 		globals::error_handler.log_semantic_error({
 			"No function implementation found for the given arguments",
 			function_call->location,
 			function_call->length,
-			"Arguments: " + signature.to_string(true)
+			"Arguments: " + signature.to_string(true),
+			"Candidate implementations:\n" + function->implementations().to_string()
 		}, true);
 	}
 
-	// Store the index of the function for the compiler
+	if (match->conversion.match_level == TypeCoercion::MatchLevel::LOSSY)
+	{
+		// Look for the lossy conversions
+		for (size_t i = 0; i < match->conversion.conversions.size(); ++i)
+		{
+			if (match->conversion.conversions[i]->effective_match_level == TypeCoercion::MatchLevel::LOSSY)
+			{
+				auto & from = signature.parameters[i].second;
+				auto & to = function->get_implementation(match->index)->signature().parameters[i].second;
+				globals::error_handler.log_warning({
+					"Lossy conversion from '" + from->name() + "' to '" + to->name() + "'",
+					function_call->arguments[i]->location,
+					function_call->arguments[i]->length
+				});
+			}
+		}
+	}
+
+	// Store the index of the function and the match conversions for the compiler
 	function_call->function_index = index;
-	function_call->function_implementation_index = impl.first;
-	return impl.second->return_class();
+	function_call->match = match;
+	return function->get_implementation(match->index)->return_class();
 }
 
 SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_identifier(IdentifierNode * identifier)
@@ -230,8 +261,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_identifier(Identifier
 	}
 
 	identifier->symbol_index = index;
-	auto reference = std::dynamic_pointer_cast<Variable>(symbol);
-	return reference->value_class();
+	return symbol->get_class();
 }
 
 SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_type(TypeNode * type)
@@ -246,7 +276,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_type(TypeNode * type)
 		}, true);
 	}
 
-	if (!symbol->is_class())
+	if (symbol->get_symbol_type() != Symbol::Type::S_CLASS)
 	{
 		globals::error_handler.log_semantic_error({
 			"Symbol '" + std::string(type->name) + "' is not a type",
@@ -255,7 +285,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_type(TypeNode * type)
 		}, true);
 	}
 
-	auto cls = std::dynamic_pointer_cast<Class>(symbol->value());
+	auto cls = std::dynamic_pointer_cast<Class>(symbol);
 	return cls;
 }
 

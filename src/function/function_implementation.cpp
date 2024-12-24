@@ -1,18 +1,27 @@
 #include "function/function_implementation.hpp"
 
 
-int FunctionSignature::measure_specificity(const FunctionSignature & other) const
+TypeCoercion::MatchResult FunctionSignature::match_arguments(const std::vector<std::pair<std::string, ClassPtr>> & arguments) const
 {
-	if (parameters.size() != other.parameters.size())
-		return 0;
+	if (arguments.size() != parameters.size())
+		return {TypeCoercion::MatchLevel::INCOMPATIBLE, {}};
 
-	int specificity = 0;
+	TypeCoercion::MatchResult result;
+	result.match_level = TypeCoercion::MatchLevel::EXACT;
+
 	for (size_t i = 0; i < parameters.size(); ++i)
 	{
-		specificity += other.parameters[i].second->measure_specificity(parameters[i].second);
+		auto & from = parameters[i].second;
+		auto & to = arguments[i].second;
+		auto path = TypeCoercion::instance().find_best_coercion_path(from, to);
+		if (path->effective_match_level == TypeCoercion::MatchLevel::INCOMPATIBLE)
+			return {TypeCoercion::MatchLevel::INCOMPATIBLE, {}};
+
+		result.match_level = result.match_level | path->effective_match_level;
+		result.conversions.push_back(path);
 	}
 
-	return specificity;
+	return result;
 }
 
 std::string FunctionSignature::to_string(bool parameters_only) const
