@@ -3,22 +3,31 @@
 #include <memory>
 #include <utility> // for `std::pair`
 
-
-struct Class;
-using ClassPtr = std::shared_ptr<Class>;
+#include "util/forward.hpp"
 
 
-// Hash specialization for std::pair<ClassPtr, ClassPtr>
 namespace std
 {
+	// Hash specialization for std::pair<ClassPtr, ClassPtr>
 	template <>
 	struct hash<std::pair<ClassPtr, ClassPtr>>
 	{
-		size_t operator()(const std::pair<ClassPtr, ClassPtr> & pair) const
-		{
-			auto hash1 = std::hash<ClassPtr>()(pair.first);
-			auto hash2 = std::hash<ClassPtr>()(pair.second);
-			return hash1 ^ (hash2 << 1);
-		}
+		size_t operator()(const std::pair<ClassPtr, ClassPtr> & pair) const;
+	};
+
+
+	// Hash specialization for Type
+	template <>
+	struct hash<Type>
+	{
+		size_t operator()(const Type & type) const;
+	};
+	
+
+	// Hash specialization for FunctionSignature
+	template<>
+	struct hash<FunctionSignature>
+	{
+		size_t operator()(const FunctionSignature & signature) const;
 	};
 }

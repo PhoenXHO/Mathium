@@ -13,6 +13,7 @@
 #include "class/builtins.hpp"
 #include "type/type.hpp"
 #include "symbol/symbol.hpp"
+#include "util/hash.hpp"
 
 
 class Function;

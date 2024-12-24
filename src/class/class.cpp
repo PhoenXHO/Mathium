@@ -1,5 +1,6 @@
 #include "class/class.hpp"
 #include "class/property.hpp"
+#include "type/type_coercion.hpp"
 
 
 bool Class::can_cast_to(const ClassPtr & target)

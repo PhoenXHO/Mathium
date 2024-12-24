@@ -1,4 +1,5 @@
 #include "function/function_implementation.hpp"
+#include "class/class.hpp"
 
 
 TypeCoercion::MatchResult FunctionSignature::match_arguments(const std::vector<std::pair<std::string, ClassPtr>> & arguments) const

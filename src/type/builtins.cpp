@@ -1,4 +1,4 @@
-#include "type/type.hpp"
+#include "type/type_coercion.hpp"
 #include "class/builtins.hpp"
 #include "object/integer_object.hpp"
 #include "object/real_object.hpp"

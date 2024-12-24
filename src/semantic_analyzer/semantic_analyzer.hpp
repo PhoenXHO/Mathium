@@ -6,30 +6,12 @@
 #include "object/object.hpp"
 #include "scope/scope.hpp"
 #include "class/class.hpp"
+#include "type/type.hpp"
 
 // This class will be responsible for type checking and other semantic analysis tasks
 class SemanticAnalyzer
 {
-	struct AnalysisResult
-	{
-		//MathObj::Type type; // The type of the expression
-		ClassPtr cls; // The class of the expression
-		bool is_const; // Whether the expression is constant
-
-		/**
-		 * @brief Construct a new Analysis Result object
-		 * @param type The type of the expression
-		 * @param is_const Whether the expression is constant
-		 **/
-		//AnalysisResult(MathObj::Type type, bool is_const = true) :
-		//	type(type),
-		//	is_const(is_const)
-		//{}
-		AnalysisResult(ClassPtr cls, bool is_const = true) :
-			cls(cls),
-			is_const(is_const)
-		{}
-	};
+	using AnalysisResult = Type;
 
 	std::shared_ptr<Scope> global_scope;
 	std::shared_ptr<Scope> current_scope = global_scope;

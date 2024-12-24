@@ -1,7 +1,7 @@
 #include <queue>
 #include <unordered_set>
 
-#include "type/type.hpp"
+#include "type/type_coercion.hpp"
 #include "object/object.hpp"
 #include "class/class.hpp"
 

@@ -11,3 +11,5 @@ class Variable;
 using VariablePtr = std::shared_ptr<Variable>;
 
 class SymbolTable;
+struct Type;
+struct FunctionSignature;

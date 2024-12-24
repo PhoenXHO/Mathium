@@ -12,7 +12,6 @@
 #include "variable/variable.hpp"
 #include "symbol/symbol_registry.hpp"
 #include "class/builtins.hpp"
-#include "type/type.hpp"
 #include "object/object.hpp"
 #include "symbol/symbol.hpp"
 
