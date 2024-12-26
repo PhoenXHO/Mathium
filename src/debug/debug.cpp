@@ -1,3 +1,4 @@
+#ifdef MATHIUM_DEV_MODE
 #include <iostream>
 #include <iomanip> // for `std::setw` and `std::setfill`
 
@@ -13,11 +14,6 @@ void indent(int indent);
 
 void Chunk::disassemble(void) const
 {
-	if (!config::dev)
-	{
-		return;
-	}
-
 	std::cout << "=== Chunk '" << name << "' ===\n";
 
 	for (auto ip = code.cbegin(); ip != code.cend();)
@@ -168,11 +164,6 @@ static std::unordered_map<Token::Type, std::string_view> token_type_to_string
 
 std::ostream & operator<<(std::ostream & os, const Token & tk)
 {
-	if (!config::dev)
-	{
-		return os;
-	}
-
 	// Disable 0-fill
 	os << std::setfill(' ');
 
@@ -203,11 +194,6 @@ std::string Token::type_to_string(Token::Type type)
 
 std::ostream & operator<<(std::ostream & os, const AST & ast)
 {
-	if (!config::dev)
-	{
-		return os;
-	}
-
 	os << "Program:\n";
 	for (const auto &stmt : ast.statements)
 	{
@@ -326,3 +312,4 @@ void indent(int indent)
 	}
 	std::cout << indent_str;
 }
+#endif

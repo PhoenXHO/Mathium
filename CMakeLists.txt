@@ -28,6 +28,12 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Add profiling flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg -g -fno-omit-frame-pointer -O0")
 
+option(MATHIUM_DEV_MODE "Enable development mode with additional debugging output" OFF)
+if(MATHIUM_DEV_MODE)
+	message(STATUS "Development mode enabled")
+	add_definitions(-DMATHIUM_DEV_MODE)
+endif()
+
 # Find the Boost libraries
 set(BOOST_COMPONENTS
 	program_options

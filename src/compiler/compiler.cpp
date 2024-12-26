@@ -26,7 +26,9 @@ void Compiler::compile_source(void)
 	chunk.emit(OP_RETURN);
 
 	//* Debugging
+#ifdef MATHIUM_DEV_MODE
 	chunk.disassemble();
+#endif
 }
 
 void Compiler::compile_statement(const ASTNode * statement_n)

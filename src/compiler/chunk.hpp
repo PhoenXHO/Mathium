@@ -102,7 +102,9 @@ struct Chunk
 	}
 
 	//* Debugging
+#ifdef MATHIUM_DEV_MODE
 	void disassemble(void) const;
+#endif
 
 private:
 	std::string name;

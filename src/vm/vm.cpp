@@ -159,10 +159,9 @@ void VM::run(void)
 
 			stack.pop();
 			std::cout << result->to_string();
-			if (config::dev)
-			{
-				std::cout << " (" << result->get_class()->name() << ")";
-			}
+			#ifdef MATHIUM_DEV_MODE
+			std::cout << " (" << result->get_class()->name() << ")";
+			#endif
 			std::cout << std::endl;
 		}
 		break;

@@ -29,7 +29,9 @@ void Parser::parse_source(void)
 	globals::error_handler.check_errors();
 
 	//* Debugging
+#ifdef MATHIUM_DEV_MODE
 	std::cout << ast;
+#endif
 }
 
 std::unique_ptr<ASTNode> Parser::statement_n(void)

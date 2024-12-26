@@ -248,10 +248,12 @@ std::shared_ptr<Token> Lexer::make_tk(Token::Type type, std::string_view lexeme,
 		location
 	);
 
+#ifdef MATHIUM_DEV_MODE
 	if (tk->type() != Token::Type::T_EOF)
 	{
 		std::cout << *tk;
 	}
+#endif
 	return tk;
 }
 

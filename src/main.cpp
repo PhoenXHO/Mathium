@@ -161,7 +161,7 @@ void define_options(po::options_description & desc)
 		("help,h", "Display this help message")
 		("version,v", "Display interpreter version and additional information")
 		("file,f", po::value<std::string>()->value_name("<file>"), "Read from a file. <file> must have the `" EXTENSION "` extension")
-		("dev,D", "Enable debug mode")
+		//("dev,D", "Enable debug mode")
 		("verbose,V", "Enable verbose output")
 		("print-all,P", "Print all expressions that do not have a semicolon at the end (if this option is not enabled, only the last expression will be printed)")
 		("benchmark,b", "Print the time taken to execute the program at the end of execution (in microseconds)")
@@ -204,12 +204,12 @@ void parse_options(int argc, const char ** argv, po::options_description & desc)
 		//interpret_file(file_name);
 	}
 
-	if (vmap.count("dev"))
+#ifdef MATHIUM_DEV_MODE
 	{
 		// enable debug output
 		std::cout << "\033[1;31m* Developer mode enabled\033[0m\n";
-		config::dev = true;
 	}
+#endif
 	if (vmap.count("verbose"))
 	{
 		// enable verbose output

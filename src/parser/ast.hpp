@@ -63,7 +63,9 @@ struct ASTNode
 	virtual ~ASTNode() = default;
 
 	//* Debugging
+#ifdef MATHIUM_DEV_MODE
 	virtual void print(int depth = 0) const = 0;
+#endif
 };
 
 // <variable-declaration> ::= "let" [ <type> ] <identifier> [ ":=" <expression> ] [ ";" ]
@@ -83,7 +85,9 @@ struct VariableDeclarationNode : public ASTNode
 	~VariableDeclarationNode() = default;
 
 	//* Debugging
+#ifdef MATHIUM_DEV_MODE
 	void print(int depth = 0) const override;
+#endif
 };
 
 // <expression-statement> ::= ( <expression> | <operand> ) [ ";" ]
@@ -99,7 +103,9 @@ struct ExpressionStatementNode : public ASTNode
 	~ExpressionStatementNode() = default;
 
 	//* Debugging
+#ifdef MATHIUM_DEV_MODE
 	void print(int depth = 0) const override;
+#endif
 };
 
 // <expression> ::= ( <operand> | <expression> ) <operator> ( <operand> | <expression> )
@@ -119,7 +125,9 @@ struct ExpressionNode : public ASTNode
 	~ExpressionNode() = default;
 
 	//* Debugging
+#ifdef MATHIUM_DEV_MODE
 	void print(int depth = 0) const override;
+#endif
 };
 
 // <operand> ::= <operator> <primary>
@@ -133,7 +141,9 @@ struct OperandNode : public ASTNode
 	~OperandNode() = default;
 
 	//* Debugging
+#ifdef MATHIUM_DEV_MODE
 	void print(int depth = 0) const override;
+#endif
 };
 
 // <operator> ::= <custom-operator> | <built-in-operator>
@@ -156,7 +166,9 @@ struct OperatorNode : public ASTNode
 	{ return op->implementations(); }
 
 	//* Debugging
+#ifdef MATHIUM_DEV_MODE
 	void print(int depth = 0) const override;
+#endif
 };
 
 // <function-call> ::= <identifier> "(" [ <expression> [ "," <expression> ]* ] ")"
@@ -171,7 +183,9 @@ struct FunctionCallNode : public ASTNode
 	~FunctionCallNode() = default;
 
 	//* Debugging
+#ifdef MATHIUM_DEV_MODE
 	void print(int depth = 0) const override;
+#endif
 };
 
 // <identifier> ::= <identifier>
@@ -185,7 +199,9 @@ struct IdentifierNode : public ASTNode
 	~IdentifierNode() = default;
 
 	//* Debugging
+#ifdef MATHIUM_DEV_MODE
 	void print(int depth = 0) const override;
+#endif
 };
 
 // <type> ::= <identifier>
@@ -198,7 +214,9 @@ struct TypeNode : public ASTNode
 	~TypeNode() = default;
 
 	//* Debugging
+#ifdef MATHIUM_DEV_MODE
 	void print(int depth = 0) const override;
+#endif
 };
 
 // <literal> ::= <integer> | <real> (for now)
@@ -212,5 +230,7 @@ struct LiteralNode : public ASTNode
 	~LiteralNode() = default;
 
 	//* Debugging
+#ifdef MATHIUM_DEV_MODE
 	void print(int depth = 0) const override;
+#endif
 };

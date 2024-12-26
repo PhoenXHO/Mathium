@@ -5,7 +5,7 @@ namespace config
 {
 	bool repl_mode = true;
 	bool verbose   = false;
-	bool dev       = false;
+	//bool dev       = false;
 	bool print_all = false;
 	bool benchmark = false;
 	bool warnings  = true;
