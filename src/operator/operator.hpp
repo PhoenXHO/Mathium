@@ -10,15 +10,6 @@
 
 #include "util/hash.hpp"
 #include "object/object.hpp"
-#include "symbol/symbol_registry.hpp"
-
-
-struct Class;
-using ClassPtr = std::shared_ptr<Class>;
-class Operator;
-using OperatorPtr = std::shared_ptr<Operator>;
-class OperatorImplentation;
-using OperatorImplentationPtr = std::shared_ptr<OperatorImplentation>;
 
 
 // Fixity of an operator
