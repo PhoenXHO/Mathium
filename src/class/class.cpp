@@ -2,7 +2,7 @@
 #include "class/property.hpp"
 #include "type/type_coercion.hpp"
 #include "type/type.hpp"
-#include "binding/binding.hpp"
+#include "variable/variable.hpp"
 
 
 bool Class::can_cast_to(const ClassPtr & target)

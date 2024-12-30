@@ -9,7 +9,7 @@
 #include <utility> // for `std::pair`
 
 #include "class/property.hpp"
-#include "binding/registry.hpp"
+#include "variable/registry.hpp"
 #include "class/builtins.hpp"
 #include "object/object.hpp"
 

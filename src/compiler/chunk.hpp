@@ -19,10 +19,10 @@ enum OpCode : uint8_t
 
 	// Instruction to set a symbol in the current scope to the value on the top of the stack (the top of the stack is not popped)
 	// + operand: `index` (1 byte); the index of the symbol in the current scope
-	OP_SET_BINDING,
+	OP_SET_VARIABLE,
 	// Instruction to get a symbol from the current scope
 	// + operand: `index` (1 byte); the index of the symbol in the current scope
-	OP_GET_BINDING,
+	OP_GET_VARIABLE,
 
 	// Instruction to get a reference to a variable from the current scope
 	// + operand: `index` (1 byte); the index of the variable in the current scope

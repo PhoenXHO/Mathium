@@ -5,19 +5,19 @@
 #include "class/builtins.hpp"
 
 
-struct Binding;
-using BindingPtr = std::shared_ptr<Binding>;
+struct Variable;
+using VariablePtr = std::shared_ptr<Variable>;
 
 
-struct Binding
+struct Variable
 {
 	bool static_type = false;
 
-	Binding(std::string_view name, ObjectPtr value)
+	Variable(std::string_view name, ObjectPtr value)
 		: m_name(name)
 		, m_value(value) {}
-	Binding(std::string_view name, ClassPtr cls);
-	~Binding() = default;
+	Variable(std::string_view name, ClassPtr cls);
+	~Variable() = default;
 
 
 	std::string name(void) const

@@ -8,7 +8,7 @@
 
 struct Property
 {
-	BindingPtr variable;
+	VariablePtr variable;
 	bool is_static;
 	//bool is_private;
 	//bool is_protected;

@@ -12,6 +12,7 @@ struct Type
 	{
 		CONST,
 		REF,
+		CONST_REF,
 		NONE
 	};
 

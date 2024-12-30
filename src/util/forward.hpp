@@ -9,14 +9,14 @@ class Object;
 using ObjectPtr = std::shared_ptr<Object>;
 struct Property;
 using PropertyPtr = std::shared_ptr<Property>;
-class Binding;
-using BindingPtr = std::shared_ptr<Binding>;
+class Variable;
+using VariablePtr = std::shared_ptr<Variable>;
 
 class Operator;
 using OperatorPtr = std::shared_ptr<Operator>;
 class OperatorImplentation;
 using OperatorImplentationPtr = std::shared_ptr<OperatorImplentation>;
 
-class BindingTable;
+class LookupTable;
 struct Type;
 struct FunctionSignature;

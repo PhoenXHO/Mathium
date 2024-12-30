@@ -4,7 +4,7 @@
 #include <memory>
 #include <string>
 
-#include "binding/binding_table.hpp"
+#include "variable/lookup_table.hpp"
 
 
 struct Scope
@@ -14,34 +14,34 @@ struct Scope
 
 	void init_global_scope(void)
 	{
-		bindings.init_builtin_classes();
-		bindings.init_builtin_operators();
-		bindings.init_builtin_functions();
+		variables.init_builtin_classes();
+		variables.init_builtin_operators();
+		variables.init_builtin_functions();
 	}
 
-	#pragma region bindings
-	/// @brief Find the binding in the current scope or any of its parents
-	/// @return A pair containing the index of the binding in the bindings table and the binding itself,
-	/// or `{ -1, nullptr }` if the binding is not defined
-	std::pair<size_t, BindingPtr> find_binding(std::string_view name) const;
+#pragma region Variables
+	/// @brief Find the variable in the current scope or any of its parents
+	/// @return A pair containing the index of the variable in the variables table and the variable itself,
+	/// or `{ -1, nullptr }` if the variable is not defined
+	std::pair<size_t, VariablePtr> find_variable(std::string_view name) const;
 
-	BindingPtr get_binding(size_t index) const
-	{ return bindings.get(index); }
+	VariablePtr get_variable(size_t index) const
+	{ return variables.get(index); }
 
-	bool is_binding_defined(std::string_view name) const
-	{ return bindings.find(name).first != -1; }
+	bool is_variable_defined(std::string_view name) const
+	{ return variables.find(name).first != -1; }
 
-	std::pair<size_t, BindingPtr> define_binding(std::string_view name, ClassPtr cls);
-	std::pair<size_t, BindingPtr> define_binding(std::string_view name, ObjectPtr value = Object::none);
-	#pragma endregion
+	std::pair<size_t, VariablePtr> define_variable(std::string_view name, ClassPtr cls);
+	std::pair<size_t, VariablePtr> define_variable(std::string_view name, ObjectPtr value = Object::none);
+#pragma endregion
 
 
-	#pragma region Operators
+#pragma region Operators
 	OperatorRegistry & get_operators(void)
-	{ return bindings.get_operators(); }
-	#pragma endregion
+	{ return variables.get_operators(); }
+#pragma endregion
 
 private:
 	std::shared_ptr<Scope> parent;
-	BindingTable bindings;
+	LookupTable variables;
 };

@@ -5,12 +5,12 @@
 #include "function/function_implementation.hpp"
 #include "class/builtins.hpp"
 #include "function/function.hpp"
-#include "binding/binding_table.hpp"
+#include "variable/lookup_table.hpp"
 #include "object/integer_object.hpp"
 #include "object/reference_object.hpp"
 
 
-void BindingTable::init_builtin_functions(void)
+void LookupTable::init_builtin_functions(void)
 {
 	FunctionImplentationPtr print0 = std::make_shared<BuiltinFunctionImplentation>(
 		FunctionSignature(),

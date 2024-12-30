@@ -11,5 +11,7 @@ std::string Type::to_string(void) const
 		str = "const " + str;
 	if (qualifier == Qualifier::REF)
 		str = "ref " + str;
+	if (qualifier == Qualifier::CONST_REF)
+		str = "const ref " + str;
 	return str;
 }

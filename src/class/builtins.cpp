@@ -7,7 +7,7 @@
 #include "class/none_class.hpp"
 #include "class/integer_class.hpp"
 #include "class/real_class.hpp"
-#include "binding/binding_table.hpp"
+#include "variable/lookup_table.hpp"
 
 
 namespace builtins
@@ -22,7 +22,7 @@ namespace builtins
 	ClassPtr integer_class;
 	ClassPtr real_class;
 
-	void init_builtin_classes(BindingTable * b_tab)
+	void init_builtin_classes(LookupTable * b_tab)
 	{
 		mathobj_class = std::make_shared<MathObjClass>();
 		class_class = std::make_shared<ClassClass>();

@@ -79,20 +79,20 @@ void VM::run(void)
 		}
 		break;
 
-	case OP_SET_BINDING:
+	case OP_SET_VARIABLE:
 		{
 			auto index = READ_BYTE();
 			auto value = stack.top();
 			// Set the variable in the current scope to the value on the stack
-			auto binding = current_scope->get_binding(index);
-			binding->set(value);
+			auto variable = current_scope->get_variable(index);
+			variable->set(value);
 		}
 		break;
-	case OP_GET_BINDING:
+	case OP_GET_VARIABLE:
 		{
 			auto index = READ_BYTE();
-			auto binding = current_scope->get_binding(index);
-			auto value = binding->value();
+			auto variable = current_scope->get_variable(index);
+			auto value = variable->value();
 			stack.push(value);
 		}
 		break;
@@ -100,8 +100,8 @@ void VM::run(void)
 	case OP_GET_REF:
 		{
 			auto index = READ_BYTE();
-			auto binding = current_scope->get_binding(index);
-			auto reference = std::make_shared<ReferenceObj>(binding);
+			auto variable = current_scope->get_variable(index);
+			auto reference = std::make_shared<ReferenceObj>(variable);
 			stack.push(reference);
 		}
 		break;
@@ -111,8 +111,8 @@ void VM::run(void)
 			auto function_index = READ_BYTE();
 			auto function_implementation_index = READ_BYTE();
 
-			auto binding = current_scope->get_binding(function_index);
-			auto function = binding->value()->as<Function>();
+			auto variable = current_scope->get_variable(function_index);
+			auto function = variable->value()->as<Function>();
 			auto implementation = function->get_implementation(function_implementation_index);
 			
 			if (implementation->type() == FunctionImplentation::FunctionType::F_BUILTIN)

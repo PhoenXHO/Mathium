@@ -4,45 +4,45 @@
 #include <unordered_map>
 #include <memory>
 
-#include "binding/binding.hpp"
+#include "variable/variable.hpp"
 #include "object/object.hpp"
-#include "binding/registry.hpp"
+#include "variable/registry.hpp"
 #include "function/function.hpp"
 #include "operator/operator.hpp"
 #include "object/none_object.hpp"
 #include "class/builtins.hpp"
 
 
-class BindingTable
+class LookupTable
 {
-	Registry<BindingPtr> bindings;
+	Registry<VariablePtr> bindings;
 	OperatorRegistry operators;
 
 public:
-	BindingTable() = default;
-	~BindingTable() = default;
+	LookupTable() = default;
+	~LookupTable() = default;
 
 
 #pragma region Bindings
-	std::pair<size_t, BindingPtr> define(std::string_view name, const ObjectPtr & object)
+	std::pair<size_t, VariablePtr> define(std::string_view name, const ObjectPtr & object)
 	{
 		auto [index, binding] = bindings.find(name);
 		if (index != -1)
 			return { index, binding };
 
-		binding = std::make_shared<Binding>(name, object);
+		binding = std::make_shared<Variable>(name, object);
 		return { bindings.define(binding->name(), binding).first, binding };
 	}
 
-	std::pair<size_t, BindingPtr> define_from_class(std::string_view name, ClassPtr cls);
+	std::pair<size_t, VariablePtr> define_from_class(std::string_view name, ClassPtr cls);
 
 	/// @brief Find the binding in the binding table with the given name
 	/// @return A pair containing the index of the binding in the binding table and the binding itself,
 	/// or `{ -1, nullptr }` if the binding is not defined
-	std::pair<size_t, BindingPtr> find(std::string_view name) const
+	std::pair<size_t, VariablePtr> find(std::string_view name) const
 	{ return bindings.find(name); }
 
-	BindingPtr get(size_t index) const
+	VariablePtr get(size_t index) const
 	{ return bindings[index]; }
 
 

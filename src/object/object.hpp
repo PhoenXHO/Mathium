@@ -9,7 +9,7 @@
 #include <boost/multiprecision/mpfr.hpp> // for `mpfr_float`
 
 #include "util/globals.hpp" // for `globals::error_handler`
-#include "binding/registry.hpp"
+#include "variable/registry.hpp"
 #include "class/property.hpp"
 #include "util/forward.hpp"
 
