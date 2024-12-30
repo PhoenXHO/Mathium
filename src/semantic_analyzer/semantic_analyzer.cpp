@@ -60,45 +60,51 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_variable_declaration(
 		type = analyze_type(variable_declaration->type.get()).cls;
 	}
 
-	// Analyze the expression if it exists
-	if (variable_declaration->expression)
+	if (!variable_declaration->expression && !type)
 	{
-		auto result = analyze(variable_declaration->expression.get());
+		// Log a warning if the type is not defined and the expression is missing
+		globals::error_handler.log_semantic_error({
+			"Variable declaration without type or expression",
+			variable_declaration->identifier->location,
+			variable_declaration->identifier->length
+		}, true);
+	}
 
-		if (type)
+	// Analyze the expression
+	auto result = analyze(variable_declaration->expression.get());
+	if (type)
+	{
+		// Try to find a coercion path
+		auto coercion_path = TypeCoercion::instance().find_best_coercion_path(result.cls, type);
+
+		// If the coercion path is incompatible, log an error
+		if (coercion_path->effective_match_level == TypeCoercion::MatchLevel::INCOMPATIBLE)
 		{
-			// Try to find a coercion path
-			auto coercion_path = TypeCoercion::instance().find_best_coercion_path(result.cls, type);
-
-			// If the coercion path is incompatible, log an error
-			if (coercion_path->effective_match_level == TypeCoercion::MatchLevel::INCOMPATIBLE)
-			{
-				globals::error_handler.log_semantic_error({
-					"Cannot convert '" + result.cls->name() + "' to '" + type->name() + "'",
-					variable_declaration->expression->location,
-					variable_declaration->expression->length
-				}, true);
-			}
-
-			// If the coercion is lossy, log a warning
-			if (coercion_path->effective_match_level == TypeCoercion::MatchLevel::LOSSY)
-			{
-				globals::error_handler.log_warning({
-					"Lossy conversion from '" + result.cls->name() + "' to '" + type->name() + "'",
-					variable_declaration->expression->location,
-					variable_declaration->expression->length
-				});
-			}
-
-			// If the match level is not exact, store the coercion path index for the compiler
-			if (coercion_path->effective_match_level != TypeCoercion::MatchLevel::EXACT)
-			{
-				variable_declaration->coercion_index = TypeCoercion::instance().get_path_index(result.cls, type);
-				variable_declaration->needs_coercion = true;
-			}
-
-			// If the match level is exact, the coercion is not needed
+			globals::error_handler.log_semantic_error({
+				"Cannot convert '" + result.cls->name() + "' to '" + type->name() + "'",
+				variable_declaration->expression->location,
+				variable_declaration->expression->length
+			}, true);
 		}
+
+		// If the coercion is lossy, log a warning
+		if (coercion_path->effective_match_level == TypeCoercion::MatchLevel::LOSSY)
+		{
+			globals::error_handler.log_warning({
+				"Lossy conversion from '" + result.cls->name() + "' to '" + type->name() + "'",
+				variable_declaration->expression->location,
+				variable_declaration->expression->length
+			});
+		}
+
+		// If the match level is not exact, store the coercion path index for the compiler
+		if (coercion_path->effective_match_level != TypeCoercion::MatchLevel::EXACT)
+		{
+			variable_declaration->coercion_index = TypeCoercion::instance().get_path_index(result.cls, type);
+			variable_declaration->needs_coercion = true;
+		}
+
+		// If the match level is exact, the coercion is not needed
 	}
 
 	// Add the variable to the current scope
@@ -192,7 +198,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_function_call(Functio
 			function_call->identifier->length
 		}, true);
 	}
-	else if (symbol->get_symbol_type() != Symbol::Type::S_FUNCTION)
+	else if (symbol->get_symbol_type() != Symbol::SymbolType::S_FUNCTION)
 	{
 		globals::error_handler.log_semantic_error({
 			"Symbol '" + std::string(function_call->identifier->name) + "' is not a function",
@@ -208,7 +214,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_function_call(Functio
 	for (auto & argument : function_call->arguments)
 	{
 		auto result = analyze(argument.get());
-		signature.parameters.push_back({ "", result.cls });
+		signature.parameters.push_back({ "", result });
 	}
 
 	// Find the most specific implementation of the function for the given signature
@@ -261,7 +267,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_identifier(Identifier
 	}
 
 	identifier->symbol_index = index;
-	return symbol->get_class();
+	return symbol->get_type();
 }
 
 SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_type(TypeNode * type)
@@ -276,7 +282,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_type(TypeNode * type)
 		}, true);
 	}
 
-	if (symbol->get_symbol_type() != Symbol::Type::S_CLASS)
+	if (symbol->get_symbol_type() != Symbol::SymbolType::S_CLASS)
 	{
 		globals::error_handler.log_semantic_error({
 			"Symbol '" + std::string(type->name) + "' is not a type",

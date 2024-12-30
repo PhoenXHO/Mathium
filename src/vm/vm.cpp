@@ -6,6 +6,8 @@
 #include "memory/memory.hpp" // for `set_dynamic_precision`
 #include "util/benchmark.hpp" // for `Benchmark`
 
+#include "object/reference_object.hpp"
+
 
 InterpretResult VM::interpret_source(bool interrupted)
 {
@@ -77,7 +79,7 @@ void VM::run(void)
 		}
 		break;
 
-	case OP_SET_REFERENCE:
+	case OP_SET_SYMBOL:
 		{
 			auto index = READ_BYTE();
 			auto value = stack.top();
@@ -87,11 +89,21 @@ void VM::run(void)
 			variable->set(value);
 		}
 		break;
-	case OP_GET_REFERENCE:
+	case OP_GET_SYMBOL:
 		{
 			auto index = READ_BYTE();
 			auto symbol = current_scope->get_symbol(index);
 			stack.push(Symbol::get_symbol_value(symbol));
+		}
+		break;
+
+	case OP_GET_REF:
+		{
+			auto index = READ_BYTE();
+			auto symbol = current_scope->get_symbol(index);
+			auto variable = std::dynamic_pointer_cast<Variable>(symbol);
+			auto reference = std::make_shared<ReferenceObj>(variable);
+			stack.push(reference);
 		}
 		break;
 

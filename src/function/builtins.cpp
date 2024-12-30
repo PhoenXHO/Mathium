@@ -7,6 +7,7 @@
 #include "function/function.hpp"
 #include "symbol/symbol_table.hpp"
 #include "object/integer_object.hpp"
+#include "object/reference_object.hpp"
 
 
 void SymbolTable::init_builtin_functions(void)
@@ -45,13 +46,22 @@ void SymbolTable::init_builtin_functions(void)
 
 
 
+	// Testing reference parameters
 	FunctionImplentationPtr func = std::make_shared<BuiltinFunctionImplentation>(
-		FunctionSignature({ { "x", builtins::integer_class }, { "y", builtins::integer_class } }, builtins::integer_class),
+		FunctionSignature({
+			{ "x", { builtins::integer_class, Type::Qualifier::REF } }, // Non-const reference of type `Integer`
+			{ "y", builtins::integer_class }
+		}, builtins::integer_class),
 		[](const std::vector<ObjectPtr> & arguments) -> ObjectPtr
 		{
-			auto x = std::dynamic_pointer_cast<IntegerObj>(arguments[0]);
+			auto x_ref = std::dynamic_pointer_cast<ReferenceObj>(arguments[0]);
+			auto x_var = x_ref->get();
+			auto x = std::dynamic_pointer_cast<IntegerObj>(x_var->value());
 			auto y = std::dynamic_pointer_cast<IntegerObj>(arguments[1]);
-			return std::make_shared<IntegerObj>(x->value() + y->value());
+
+			x_var->set(std::make_shared<IntegerObj>(x->value() + y->value()));
+			
+			return x_var->value();
 		}
 	);
 

@@ -46,7 +46,7 @@ struct FunctionImplentationRegistry
 		std::string str = "{\n";
 		for (const auto & impl : implementations)
 		{
-			str += "  " + impl->signature().to_string() + "\n";
+			str += "    " + impl->signature().to_string() + "\n";
 		}
 		str += "}";
 		return str;
@@ -64,11 +64,14 @@ public:
 	~Function() = default;
 
 
-	Type get_symbol_type() const override
-	{ return Type::S_FUNCTION; }
+	SymbolType get_symbol_type() const override
+	{ return SymbolType::S_FUNCTION; }
 
 	ClassPtr get_class() const override
 	{ return builtins::function_class; }
+
+	Type get_type() override
+	{ return Type(builtins::function_class, Type::Qualifier::CONST); }
 
 
 	FunctionImplentationRegistry & implementations()

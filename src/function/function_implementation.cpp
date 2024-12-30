@@ -12,8 +12,8 @@ TypeCoercion::MatchResult FunctionSignature::match_arguments(const std::vector<s
 
 	for (size_t i = 0; i < parameters.size(); ++i)
 	{
-		auto & from = parameters[i].second.cls;
-		auto & to = arguments[i].second.cls;
+		auto & from = parameters[i].second;
+		auto & to = arguments[i].second;
 		auto path = TypeCoercion::instance().find_best_coercion_path(from, to);
 		if (path->effective_match_level == TypeCoercion::MatchLevel::INCOMPATIBLE)
 			return {TypeCoercion::MatchLevel::INCOMPATIBLE, {}};

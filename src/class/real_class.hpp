@@ -5,7 +5,7 @@
 
 struct RealClass : public Class
 {
-	RealClass(void) : Class("Real", { builtins::mathobj_class }) {}
+	RealClass(void) : Class("Real", { builtins::mathobj_class }, true) {}
 
 	ObjectPtr instantiate(const std::any & value) const override;
 	ObjectPtr default_value(void) const override;

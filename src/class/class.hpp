@@ -18,21 +18,25 @@
 
 struct Class : public Object, public Symbol
 {	
-	Class(std::string name, std::vector<ClassPtr> bases)
+	Class(std::string name, std::vector<ClassPtr> bases, bool immutable = false)
 		: Object(builtins::class_class)
 		, Symbol(name)
-		, bases(bases) {}
-	Class(std::string name)
+		, bases(bases)
+		, immutable(immutable) {}
+	Class(std::string name, bool immutable = false)
 		: Object(nullptr)
-		, Symbol(name) {}
+		, Symbol(name)
+		, immutable(immutable) {}
 	~Class() = default;
 
 
-	Symbol::Type get_symbol_type() const override
-	{ return Symbol::Type::S_CLASS; }
+	Symbol::SymbolType get_symbol_type() const override
+	{ return Symbol::SymbolType::S_CLASS; }
 
 	ClassPtr get_class() const override
 	{ return builtins::class_class; }
+
+	Type get_type() override;
 
 
 #pragma region Core Interface
@@ -49,6 +53,9 @@ struct Class : public Object, public Symbol
 
 	void set_class(const ClassPtr & cls)
 	{ m_class = cls; }
+
+	bool is_immutable(void) const
+	{ return immutable; }
 #pragma endregion
 
 
@@ -90,5 +97,6 @@ protected:
 	Registry<PropertyPtr> m_properties; // Properties of the class
 
 private:
+	bool immutable = false; // Whether the class is immutable
 	std::vector<ClassPtr> bases; // Inheritance
 };

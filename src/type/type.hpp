@@ -2,30 +2,36 @@
 
 #include <string>
 
-#include "class/class.hpp"
+#include "util/forward.hpp"
 #include "class/builtins.hpp"
 
 
 struct Type
 {
-	ClassPtr cls;
-	bool is_const;
-	bool is_ref;
-
-	Type(ClassPtr cls, bool is_const = true, bool is_ref = false)
-		: cls(cls)
-		, is_const(is_const)
-		, is_ref(is_ref) {}
-
-	std::string to_string(void) const
+	enum class Qualifier
 	{
-		std::string str = cls->name();
-		if (cls == builtins::none_class)
-			return str;
-		if (is_const)
-			str = "const " + str;
-		if (is_ref)
-			str = "ref " + str;
-		return str;
+		CONST,
+		REF,
+		NONE
+	};
+
+	ClassPtr cls;
+	Qualifier qualifier;
+
+	Type(ClassPtr cls, Qualifier qualifier = Qualifier::NONE)
+		: cls(cls)
+		, qualifier(qualifier) {}
+
+	std::string to_string(void) const;
+
+
+	static Qualifier bool_to_qualifier(bool is_const)
+	{
+		return is_const ? Qualifier::CONST : Qualifier::NONE;
+	}
+
+	bool operator==(const Type & other) const
+	{
+		return cls == other.cls && qualifier == other.qualifier;
 	}
 };

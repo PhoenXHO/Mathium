@@ -4,6 +4,7 @@
 #include "type/type_coercion.hpp"
 #include "object/object.hpp"
 #include "class/class.hpp"
+#include "object/reference_object.hpp"
 
 
 void TypeCoercion::add_rule(ClassPtr from, ClassPtr to, CoercionFunction converter, MatchLevel match_level)
@@ -41,19 +42,37 @@ TypeCoercion::MatchLevel TypeCoercion::get_match_level(const ClassPtr & from, Cl
 	return MatchLevel::INCOMPATIBLE;
 }
 
-TypeCoercion::CoercionPathPtr TypeCoercion::find_best_coercion_path(const ClassPtr & from, const ClassPtr & to) const
+TypeCoercion::CoercionPathPtr TypeCoercion::find_best_coercion_path(const Type & from, const Type & to) const
 {
+	if (from.qualifier == Type::Qualifier::REF && to.qualifier == Type::Qualifier::REF)
+	{
+		// Direct reference conversion
+		if (from == to)
+			return std::make_shared<CoercionPath>(CoercionPath{ {}, MatchLevel::REF });
+
+		// Inheritance reference conversion
+		if (from.cls->is_sub_class(to.cls))
+			return std::make_shared<CoercionPath>(CoercionPath{ {}, MatchLevel::REF_INHERITANCE });
+	}
+	
 	// Direct conversion
 	if (from == to)
 		return std::make_shared<CoercionPath>(CoercionPath{ {}, MatchLevel::EXACT });
 
+	auto from_cls = from.cls;
+	auto to_cls = to.cls;
+
 	// Check if the path is already cached
-	if (m_path_index_cache.contains({ from, to }))
-		return m_path_cache[m_path_index_cache[{ from, to }]];
+	if (m_path_index_cache.contains({ from_cls, to_cls }))
+		return m_path_cache[m_path_index_cache[{ from_cls, to_cls }]];
 
 	// Check if there is an inheritance match
-	if (from->is_sub_class(to))
+	if (from_cls->is_sub_class(to_cls))
+	{
+		if (from.qualifier == Type::Qualifier::REF && to.qualifier == Type::Qualifier::REF)
+			return std::make_shared<CoercionPath>(CoercionPath{ {}, MatchLevel::REF_INHERITANCE });
 		return std::make_shared<CoercionPath>(CoercionPath{ {}, MatchLevel::INHERITANCE });
+	}
 
 	// Dijkstra's algorithm
 	std::unordered_map<ClassPtr, MatchLevel> best_matches;
@@ -65,8 +84,8 @@ TypeCoercion::CoercionPathPtr TypeCoercion::find_best_coercion_path(const ClassP
 	> queue;
 
 	// Set the initial distance
-	best_matches[from] = MatchLevel::EXACT;
-	queue.push({ MatchLevel::EXACT, from });
+	best_matches[from_cls] = MatchLevel::EXACT;
+	queue.push({ MatchLevel::EXACT, from_cls });
 
 	while (!queue.empty())
 	{
@@ -81,7 +100,7 @@ TypeCoercion::CoercionPathPtr TypeCoercion::find_best_coercion_path(const ClassP
 			CoercionPath path;
 			path.effective_match_level = current_level;
 			
-			ClassPtr _current = to;
+			ClassPtr _current = to_cls;
 			while (_current != from)
 			{
 				auto [prev, converter] = previous[_current];
@@ -91,7 +110,7 @@ TypeCoercion::CoercionPathPtr TypeCoercion::find_best_coercion_path(const ClassP
 
 			std::reverse(path.steps.begin(), path.steps.end());
 			// Cache the path
-			cache_path(from, to, std::make_shared<CoercionPath>(path));
+			cache_path(from_cls, to_cls, std::make_shared<CoercionPath>(path));
 			// Return the last element (the one with the highest match level)
 			return m_path_cache.back();
 		}

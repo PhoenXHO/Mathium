@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include "util/hash.hpp"
+#include "type/type.hpp"
 
 
 class TypeCoercion
@@ -17,11 +18,13 @@ public:
 	/// Lower values are worse matches
 	enum class MatchLevel
 	{
-		EXACT = 3,        // Exact match
-		LOSSLESS = 2,     // Good match - e.g. `Integer -> Real`
-		INHERITANCE = 1,  // Good match
-		LOSSY = 0,        // Lossy conversion - e.g. `Real -> Integer`
-		INCOMPATIBLE = -1 // No conversion possible
+		EXACT = 5,           // Exact match
+		REF = 4,             // Reference conversion
+		REF_INHERITANCE = 3, // Good match - e.g. `ref Function -> ref MathObj`
+		LOSSLESS = 2,        // Good match - e.g. `Integer -> Real`
+		INHERITANCE = 1,     // Good match
+		LOSSY = 0,           // Lossy conversion - e.g. `Real -> Integer`
+		INCOMPATIBLE = -1    // No conversion possible
 	};
 
 	using CoercionFunction = std::function<ObjectPtr(const ObjectPtr &)>;
@@ -56,7 +59,7 @@ public:
 	};
 
 
-	CoercionPathPtr find_best_coercion_path(const ClassPtr & from, const ClassPtr & to) const;
+	CoercionPathPtr find_best_coercion_path(const Type & from, const Type & to) const;
 
 private:
 	static std::shared_ptr<TypeCoercion> m_instance; // Singleton instance

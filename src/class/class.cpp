@@ -1,7 +1,14 @@
 #include "class/class.hpp"
 #include "class/property.hpp"
 #include "type/type_coercion.hpp"
+#include "type/type.hpp"
 
+
+Type Class::get_type(void)
+{
+	auto cls = std::dynamic_pointer_cast<Class>(shared_from_this());
+	return Type(cls, Type::Qualifier::CONST);
+}
 
 bool Class::can_cast_to(const ClassPtr & target)
 {

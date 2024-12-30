@@ -17,12 +17,16 @@ enum OpCode : uint8_t
 	// + operand: `index` (1 byte); the index of the type in the coercion cache
 	OP_COERCE,
 
-	// Instruction to set a reference in the current scope to the value on the top of the stack (the top of the stack is not popped)
-	// + operand: `index` (1 byte); the index of the reference in the current scope
-	OP_SET_REFERENCE,
-	// Instruction to get a reference from the current scope
-	// + operand: `index` (1 byte); the index of the reference in the current scope
-	OP_GET_REFERENCE,
+	// Instruction to set a symbol in the current scope to the value on the top of the stack (the top of the stack is not popped)
+	// + operand: `index` (1 byte); the index of the symbol in the current scope
+	OP_SET_SYMBOL,
+	// Instruction to get a symbol from the current scope
+	// + operand: `index` (1 byte); the index of the symbol in the current scope
+	OP_GET_SYMBOL,
+
+	// Instruction to get a reference to a variable from the current scope
+	// + operand: `index` (1 byte); the index of the variable in the current scope
+	OP_GET_REF,
 
 	// Instruction to call a function
 	// + operands:

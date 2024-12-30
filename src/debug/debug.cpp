@@ -43,16 +43,26 @@ std::vector<uint8_t>::const_iterator Chunk::disassemble_instruction(std::vector<
 				  << static_cast<int>(*(ip + 1)) << std::left;
 		return ip + 2;
 
-	case OP_SET_REFERENCE:
+	case OP_SET_SYMBOL:
 	{
 		auto variable = current_scope->get_symbol(static_cast<int>(*(ip + 1)));
-		std::cout << "SET_REFERENCE" 
+		std::cout << "SET_SYMBOL" 
 				  << std::setw(9) << std::setfill(' ') << std::right
 				  << static_cast<int>(*(ip + 1)) << std::left
 				  << "  " << variable->to_string();
 		return ip + 2;
 	}
-	case OP_GET_REFERENCE:
+	case OP_GET_SYMBOL:
+	{
+		auto variable = current_scope->get_symbol(static_cast<int>(*(ip + 1)));
+		std::cout << "GET_SYMBOL" 
+				  << std::setw(9) << std::setfill(' ') << std::right
+				  << static_cast<int>(*(ip + 1)) << std::left
+				  << "  " << variable->to_string();
+		return ip + 2;
+	}
+
+	case OP_GET_REF:
 	{
 		auto variable = current_scope->get_symbol(static_cast<int>(*(ip + 1)));
 		std::cout << "GET_REFERENCE" 

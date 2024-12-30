@@ -1,5 +1,7 @@
 #include "variable/variable.hpp"
 #include "class/class.hpp"
+#include "class/builtins.hpp"
+#include "function/function.hpp"
 
 
 Variable::Variable(std::string_view name, ClassPtr cls)
@@ -12,7 +14,7 @@ std::string Variable::to_string(void) const
 {
 	std::ostringstream oss;
 	oss << '<' << m_name
-		<< " (" << value_class()->name() << ") = "
+		<< " (" << get_class()->name() << ") = "
 		<< value()->to_string() << '>'
 		<< " (" << this << ')';
 	return oss.str();

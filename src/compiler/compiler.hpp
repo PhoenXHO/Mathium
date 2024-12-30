@@ -20,6 +20,7 @@ class Compiler
 	std::shared_ptr<Scope> current_scope = global_scope;
 	std::vector<std::shared_ptr<OperatorImplentation>> operator_stack;
 	size_t last_print = 0;
+	bool get_ref = false; // Flag to indicate that the next `OP_GET_SYMBOL` instruction should get a reference
 
 	void compile_statement            (const ASTNode *)                             ;
 	void compile_variable_declaration (const VariableDeclarationNode *)             ;

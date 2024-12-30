@@ -5,7 +5,7 @@
 
 struct ReferenceClass : public Class
 {
-	ReferenceClass(void) : Class("Reference", { builtins::mathobj_class }) {}
+	ReferenceClass(void) : Class("Reference", { builtins::mathobj_class }, true) {}
 
 	ObjectPtr instantiate(const std::any & value) const override;
 	ObjectPtr default_value(void) const override;

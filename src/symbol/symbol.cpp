@@ -9,11 +9,11 @@ ObjectPtr Symbol::get_symbol_value(SymbolPtr symbol)
 {
 	switch (symbol->get_symbol_type())
 	{
-	case Symbol::Type::S_CLASS:
+	case Symbol::SymbolType::S_CLASS:
 		return std::dynamic_pointer_cast<Class>(symbol);
-	case Symbol::Type::S_FUNCTION:
+	case Symbol::SymbolType::S_FUNCTION:
 		return std::dynamic_pointer_cast<Function>(symbol);
-	case Symbol::Type::S_VARIABLE:
+	case Symbol::SymbolType::S_VARIABLE:
 		return std::dynamic_pointer_cast<Variable>(symbol)->value();
 	default:
 		return Object::none;

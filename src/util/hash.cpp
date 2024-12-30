@@ -18,13 +18,11 @@ namespace std
 	size_t hash<Type>::operator()(const Type & type) const
 	{
 		size_t h1 = std::hash<std::shared_ptr<Class>>{}(type.cls);
-		size_t h2 = std::hash<bool>()(type.is_const);
-		size_t h3 = std::hash<bool>()(type.is_ref);
+		size_t h2 = std::hash<Type::Qualifier>{}(type.qualifier);
 
 		// Combine the hashes
 		size_t seed = h1;
 		seed ^= h2 + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-		seed ^= h3 + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 		return seed;
 	}
 

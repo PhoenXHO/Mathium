@@ -101,7 +101,7 @@ void Compiler::compile_variable_declaration(const VariableDeclarationNode * vari
 			chunk.emit(OP_COERCE, variable_declaration->coercion_index);
 		}
 		
-		chunk.emit(OP_SET_REFERENCE, index); // Set the variable in the current scope to the value on the stack and print it
+		chunk.emit(OP_SET_SYMBOL, index); // Set the variable in the current scope to the value on the stack and print it
 		compile_print(variable_declaration->print_expression);
 	}
 }
@@ -230,13 +230,18 @@ void Compiler::compile_function_call(const FunctionCallNode * function_call_n)
 	auto & match = function_call_n->match;
 	for (size_t i = 0; i < function_call_n->arguments.size(); ++i)
 	{
-		compile_expression(function_call_n->arguments[i].get());
+		auto coercion = match->conversion.conversions[i];
+		auto effective_match_level = coercion->effective_match_level;
 		// Check if the argument needs to be coerced
-		if (match->conversion.conversions[i]->effective_match_level != TypeCoercion::MatchLevel::EXACT)
+		get_ref = effective_match_level == TypeCoercion::MatchLevel::REF ||
+				  effective_match_level == TypeCoercion::MatchLevel::REF_INHERITANCE;
+
+		compile_expression(function_call_n->arguments[i].get());
+		// No else statement because we want to coerce the argument even if it is a reference
+		if (effective_match_level != TypeCoercion::MatchLevel::EXACT &&
+			effective_match_level != TypeCoercion::MatchLevel::REF)
 		{
-			size_t coercion_index = TypeCoercion::instance().cache_path(
-				match->conversion.conversions[i]
-			);
+			size_t coercion_index = TypeCoercion::instance().cache_path(coercion);
 			chunk.emit(OP_COERCE, coercion_index);
 		}
 	}
@@ -258,7 +263,15 @@ void Compiler::compile_identifier(const IdentifierNode * identifier_n)
 		return;
 	}
 
-	chunk.emit(OP_GET_REFERENCE, index);
+	if (get_ref)
+	{
+		chunk.emit(OP_GET_REF, index);
+		get_ref = false;
+	}
+	else
+	{
+		chunk.emit(OP_GET_SYMBOL, index);
+	}
 }
 
 void Compiler::compile_literal(const LiteralNode * literal_n)

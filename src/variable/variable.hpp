@@ -21,11 +21,14 @@ struct Variable : public Symbol
 	~Variable() = default;
 
 
-	Type get_symbol_type() const override
-	{ return Type::S_VARIABLE; }
+	SymbolType get_symbol_type() const override
+	{ return SymbolType::S_VARIABLE; }
 
 	ClassPtr get_class() const override
 	{ return m_value ? m_value->get_class() : builtins::none_class; }
+
+	Type get_type() override
+	{ return Type(m_value->get_class(), is_const ? Type::Qualifier::CONST : Type::Qualifier::REF); }
 
 
 	std::string name(void) const
@@ -39,9 +42,6 @@ struct Variable : public Symbol
 	const ObjectPtr & value(void) const
 	{ return m_value ? m_value : Object::none; }
 
-	ClassPtr value_class(void) const
-	{ return m_value ? m_value->get_class() : builtins::none_class; }
-
 	bool is_function(void) const
 	{ return m_value->get_class() == builtins::function_class; }
 
@@ -49,6 +49,7 @@ struct Variable : public Symbol
 	{ return m_value->get_class() == builtins::class_class; }
 
 private:
+	bool is_const = false;
 	ObjectPtr m_value;
 };
 
