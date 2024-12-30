@@ -2,13 +2,8 @@
 #include "class/property.hpp"
 #include "type/type_coercion.hpp"
 #include "type/type.hpp"
+#include "binding/binding.hpp"
 
-
-Type Class::get_type(void)
-{
-	auto cls = std::dynamic_pointer_cast<Class>(shared_from_this());
-	return Type(cls, Type::Qualifier::CONST);
-}
 
 bool Class::can_cast_to(const ClassPtr & target)
 {
@@ -71,6 +66,11 @@ int Class::measure_specificity(const ClassPtr & target)
 		return 1;
 
 	return 0;
+}
+
+void Class::add_property(const PropertyPtr & property)
+{
+	m_properties.define(property->name(), property);
 }
 
 std::string_view Property::name(void) const

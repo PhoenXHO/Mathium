@@ -17,5 +17,5 @@ namespace builtins
 	extern ClassPtr integer_class; // The class for integer objects
 	extern ClassPtr real_class; // The class for real objects
 
-	extern void init_builtin_classes(SymbolTable * symtab);
+	extern void init_builtin_classes(BindingTable * symtab);
 }

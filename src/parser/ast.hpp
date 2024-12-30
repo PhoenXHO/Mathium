@@ -192,7 +192,7 @@ struct FunctionCallNode : public ASTNode
 struct IdentifierNode : public ASTNode
 {
 	std::string_view name;
-	size_t symbol_index = 0;
+	size_t binding_index = 0;
 
 	IdentifierNode() : ASTNode(Type::N_IDENTIFIER) {}
 	IdentifierNode(std::string_view name) : ASTNode(Type::N_IDENTIFIER), name(name) {}

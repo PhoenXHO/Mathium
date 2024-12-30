@@ -9,34 +9,23 @@
 #include <utility> // for `std::pair`
 
 #include "class/property.hpp"
-#include "variable/variable.hpp"
-#include "symbol/symbol_registry.hpp"
+#include "binding/registry.hpp"
 #include "class/builtins.hpp"
 #include "object/object.hpp"
-#include "symbol/symbol.hpp"
 
 
-struct Class : public Object, public Symbol
+struct Class : public Object
 {	
 	Class(std::string name, std::vector<ClassPtr> bases, bool immutable = false)
 		: Object(builtins::class_class)
-		, Symbol(name)
+		, m_name(name)
 		, bases(bases)
 		, immutable(immutable) {}
 	Class(std::string name, bool immutable = false)
 		: Object(nullptr)
-		, Symbol(name)
+		, m_name(name)
 		, immutable(immutable) {}
 	~Class() = default;
-
-
-	Symbol::SymbolType get_symbol_type() const override
-	{ return Symbol::SymbolType::S_CLASS; }
-
-	ClassPtr get_class() const override
-	{ return builtins::class_class; }
-
-	Type get_type() override;
 
 
 #pragma region Core Interface
@@ -66,10 +55,7 @@ struct Class : public Object, public Symbol
 	PropertyPtr get_property(std::string_view name) const
 	{ return m_properties[name].second; }
 
-	void add_property(const PropertyPtr & property)
-	{
-		m_properties.define(property->variable->name(), property);
-	}
+	void add_property(const PropertyPtr & property);
 #pragma endregion
 
 
@@ -94,6 +80,7 @@ struct Class : public Object, public Symbol
 #pragma endregion
 
 protected:
+	std::string m_name;
 	Registry<PropertyPtr> m_properties; // Properties of the class
 
 private:

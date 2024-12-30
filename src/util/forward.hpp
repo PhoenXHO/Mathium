@@ -7,9 +7,11 @@ class Class;
 using ClassPtr = std::shared_ptr<Class>;
 class Object;
 using ObjectPtr = std::shared_ptr<Object>;
-class Variable;
-using VariablePtr = std::shared_ptr<Variable>;
+struct Property;
+using PropertyPtr = std::shared_ptr<Property>;
+class Binding;
+using BindingPtr = std::shared_ptr<Binding>;
 
-class SymbolTable;
+class BindingTable;
 struct Type;
 struct FunctionSignature;

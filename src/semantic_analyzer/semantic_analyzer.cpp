@@ -43,7 +43,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze(ASTNode * node)
 SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_variable_declaration(VariableDeclarationNode * variable_declaration)
 {
 	// Check if the variable name is already defined in the current scope
-	if (current_scope->is_symbol_defined(variable_declaration->identifier->name))
+	if (current_scope->is_binding_defined(variable_declaration->identifier->name))
 	{
 		// Log a warning instead of an error, to allow overwriting variables
 		globals::error_handler.log_warning({
@@ -111,12 +111,12 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_variable_declaration(
 	size_t index;
 	if (type)
 	{
-		index = current_scope->define_variable(variable_declaration->identifier->name, type).first;
+		index = current_scope->define_binding(variable_declaration->identifier->name, type).first;
 	}
 	else
 	{
 		// If the type is not defined, use the default type
-		index = current_scope->define_variable(variable_declaration->identifier->name).first;
+		index = current_scope->define_binding(variable_declaration->identifier->name).first;
 	}
 	variable_declaration->variable_index = index;
 
@@ -189,7 +189,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_operand(OperandNode *
 
 SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_function_call(FunctionCallNode * function_call)
 {
-	auto [index, symbol] = current_scope->find_symbol(function_call->identifier->name);
+	auto [index, binding] = current_scope->find_binding(function_call->identifier->name);
 	if (index == -1)
 	{
 		globals::error_handler.log_semantic_error({
@@ -198,7 +198,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_function_call(Functio
 			function_call->identifier->length
 		}, true);
 	}
-	else if (symbol->get_symbol_type() != Symbol::SymbolType::S_FUNCTION)
+	else if (!binding->is_function())
 	{
 		globals::error_handler.log_semantic_error({
 			"Symbol '" + std::string(function_call->identifier->name) + "' is not a function",
@@ -207,7 +207,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_function_call(Functio
 		}, true);
 	}
 
-	auto function = std::dynamic_pointer_cast<Function>(symbol);
+	auto function = binding->value()->as<Function>();
 	
 	// Analyze the arguments
 	FunctionSignature signature;
@@ -256,7 +256,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_function_call(Functio
 
 SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_identifier(IdentifierNode * identifier)
 {
-	auto [index, symbol] = current_scope->find_symbol(identifier->name);
+	auto [index, binding] = current_scope->find_binding(identifier->name);
 	if (index == -1)
 	{
 		globals::error_handler.log_semantic_error({
@@ -266,13 +266,13 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_identifier(Identifier
 		}, true);
 	}
 
-	identifier->symbol_index = index;
-	return symbol->get_type();
+	identifier->binding_index = index;
+	return { binding->get_class(), Type::Qualifier::REF };
 }
 
 SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_type(TypeNode * type)
 {
-	auto [index, symbol] = current_scope->find_symbol(type->name);
+	auto [index, binding] = current_scope->find_binding(type->name);
 	if (index == -1)
 	{
 		globals::error_handler.log_semantic_error({
@@ -282,7 +282,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_type(TypeNode * type)
 		}, true);
 	}
 
-	if (symbol->get_symbol_type() != Symbol::SymbolType::S_CLASS)
+	if (!binding->is_class())
 	{
 		globals::error_handler.log_semantic_error({
 			"Symbol '" + std::string(type->name) + "' is not a type",
@@ -291,7 +291,7 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_type(TypeNode * type)
 		}, true);
 	}
 
-	auto cls = std::dynamic_pointer_cast<Class>(symbol);
+	auto cls = binding->value()->as<Class>();
 	return cls;
 }
 

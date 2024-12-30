@@ -12,7 +12,6 @@
 #include "object/object.hpp"
 #include "class/builtins.hpp"
 #include "type/type.hpp"
-#include "symbol/symbol.hpp"
 #include "util/hash.hpp"
 
 
@@ -53,25 +52,18 @@ struct FunctionImplentationRegistry
 	}
 };
 
-class Function : public Object, public Symbol
+class Function : public Object
 {
 	FunctionImplentationRegistry m_implementations;
+
+protected:
+	std::string m_name;
 
 public:
 	Function(std::string_view name)
 		: Object(builtins::function_class)
-		, Symbol(name) {}
+		, m_name(name) {}
 	~Function() = default;
-
-
-	SymbolType get_symbol_type() const override
-	{ return SymbolType::S_FUNCTION; }
-
-	ClassPtr get_class() const override
-	{ return builtins::function_class; }
-
-	Type get_type() override
-	{ return Type(builtins::function_class, Type::Qualifier::CONST); }
 
 
 	FunctionImplentationRegistry & implementations()

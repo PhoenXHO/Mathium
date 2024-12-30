@@ -9,7 +9,7 @@
 #include <boost/multiprecision/mpfr.hpp> // for `mpfr_float`
 
 #include "util/globals.hpp" // for `globals::error_handler`
-#include "symbol/symbol_registry.hpp"
+#include "binding/registry.hpp"
 #include "class/property.hpp"
 #include "util/forward.hpp"
 
@@ -35,6 +35,9 @@ public:
 	{ return ""; }
 	std::ostream & operator<<(std::ostream & os) const
 	{ return os << to_string(); }
+	template <typename T>
+	std::shared_ptr<T> as(void)
+	{ return std::dynamic_pointer_cast<T>(shared_from_this()); }
 #pragma endregion
 
 

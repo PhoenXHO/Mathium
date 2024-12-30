@@ -7,7 +7,7 @@
 #include "class/none_class.hpp"
 #include "class/integer_class.hpp"
 #include "class/real_class.hpp"
-#include "symbol/symbol_table.hpp"
+#include "binding/binding_table.hpp"
 
 
 namespace builtins
@@ -22,7 +22,7 @@ namespace builtins
 	ClassPtr integer_class;
 	ClassPtr real_class;
 
-	void init_builtin_classes(SymbolTable * symtab)
+	void init_builtin_classes(BindingTable * b_tab)
 	{
 		mathobj_class = std::make_shared<MathObjClass>();
 		class_class = std::make_shared<ClassClass>();
@@ -42,15 +42,15 @@ namespace builtins
 		real_class = std::make_shared<RealClass>();
 
 		// Initialize the classes and add them to the symbol table
-		mathobj_class->init(); symtab->define("MathObj", mathobj_class);
-		class_class->init(); symtab->define("Class", class_class);
-		none_class->init(); symtab->define("None", none_class);
+		mathobj_class->init(); b_tab->define("MathObj", mathobj_class);
+		class_class->init(); b_tab->define("Class", class_class);
+		none_class->init(); b_tab->define("None", none_class);
 
-		function_class->init(); symtab->define("Function", function_class);
-		reference_class->init(); symtab->define("Reference", reference_class);
+		function_class->init(); b_tab->define("Function", function_class);
+		reference_class->init(); b_tab->define("Reference", reference_class);
 
-		integer_class->init(); symtab->define("Integer", integer_class);
-		real_class->init(); symtab->define("Real", real_class);
+		integer_class->init(); b_tab->define("Integer", integer_class);
+		real_class->init(); b_tab->define("Real", real_class);
 
 		// Initialize the type coercions
 		builtins::init_builtin_type_coercions();

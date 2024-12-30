@@ -101,7 +101,7 @@ void Compiler::compile_variable_declaration(const VariableDeclarationNode * vari
 			chunk.emit(OP_COERCE, variable_declaration->coercion_index);
 		}
 		
-		chunk.emit(OP_SET_SYMBOL, index); // Set the variable in the current scope to the value on the stack and print it
+		chunk.emit(OP_SET_BINDING, index); // Set the variable in the current scope to the value on the stack and print it
 		compile_print(variable_declaration->print_expression);
 	}
 }
@@ -251,7 +251,7 @@ void Compiler::compile_function_call(const FunctionCallNode * function_call_n)
 
 void Compiler::compile_identifier(const IdentifierNode * identifier_n)
 {
-	size_t index = identifier_n->symbol_index;
+	size_t index = identifier_n->binding_index;
 	if (index >= UINT8_MAX)
 	{
 		// We have reached the maximum number of variables
@@ -270,7 +270,7 @@ void Compiler::compile_identifier(const IdentifierNode * identifier_n)
 	}
 	else
 	{
-		chunk.emit(OP_GET_SYMBOL, index);
+		chunk.emit(OP_GET_BINDING, index);
 	}
 }
 

@@ -1,27 +1,25 @@
 #include "scope/scope.hpp"
 
 
-std::pair<size_t, SymbolPtr> Scope::find_symbol(std::string_view name) const
+std::pair<size_t, BindingPtr> Scope::find_binding(std::string_view name) const
 {
-	auto [index, symbol] = symbols.find(name);
+	auto [index, binding] = bindings.find(name);
 	if (index != -1)
-		return { index, symbol };
+		return { index, binding };
 
-	// If the symbol is not found in the current scope, check the parent scope
+	// If the binding is not found in the current scope, check the parent scope
 	if (parent)
-		return parent->find_symbol(name);
+		return parent->find_binding(name);
 
 	return { -1, nullptr };
 }
 
-std::pair<size_t, SymbolPtr> Scope::define_variable(std::string_view name, ClassPtr cls)
+std::pair<size_t, BindingPtr> Scope::define_binding(std::string_view name, ClassPtr cls)
 {
-	VariablePtr variable = std::make_shared<Variable>(name, cls);
-	return symbols.define(name, variable);
+	return bindings.define_from_class(name, cls);
 }
 
-std::pair<size_t, SymbolPtr> Scope::define_variable(std::string_view name, ObjectPtr value)
+std::pair<size_t, BindingPtr> Scope::define_binding(std::string_view name, ObjectPtr value)
 {
-	VariablePtr variable = std::make_shared<Variable>(name, value);
-	return symbols.define(name, variable);
+	return bindings.define(name, value);
 }
