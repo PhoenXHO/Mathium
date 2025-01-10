@@ -34,7 +34,7 @@ void Parser::parse_source(void)
 #endif
 }
 
-std::unique_ptr<ASTNode> Parser::statement_n(void)
+std::shared_ptr<ASTNode> Parser::statement_n(void)
 {
 	switch (curr_tk->type())
 	{
@@ -50,7 +50,7 @@ std::unique_ptr<ASTNode> Parser::statement_n(void)
 	}
 }
 
-std::unique_ptr<VariableDeclarationNode> Parser::variable_declaration_n(void)
+std::shared_ptr<VariableDeclarationNode> Parser::variable_declaration_n(void)
 {
 	auto variable_declaration = std::make_unique<VariableDeclarationNode>();
 	variable_declaration->location = curr_tk->location();
@@ -89,7 +89,7 @@ std::unique_ptr<VariableDeclarationNode> Parser::variable_declaration_n(void)
 	return variable_declaration;
 }
 
-std::unique_ptr<ExpressionStatementNode> Parser::expression_statement_n(void)
+std::shared_ptr<ExpressionStatementNode> Parser::expression_statement_n(void)
 {
 	auto expression = expression_n(Precedence::P_MIN);
 	if (!expression)
@@ -131,7 +131,7 @@ std::unique_ptr<ExpressionStatementNode> Parser::expression_statement_n(void)
 	return statement;
 }
 
-std::unique_ptr<ASTNode> Parser::expression_n(Precedence min_p)
+std::shared_ptr<ASTNode> Parser::expression_n(Precedence min_p)
 {
 	auto left = operand_n();
 	if (!left)
@@ -181,7 +181,7 @@ std::unique_ptr<ASTNode> Parser::expression_n(Precedence min_p)
 	return left;
 }
 
-std::unique_ptr<ASTNode> Parser::operand_n(void)
+std::shared_ptr<ASTNode> Parser::operand_n(void)
 {
 	auto operand = std::make_unique<OperandNode>();
 	operand->location = curr_tk->location();
@@ -204,20 +204,15 @@ std::unique_ptr<ASTNode> Parser::operand_n(void)
 	return operand;
 }
 
-std::unique_ptr<OperatorNode> Parser::operator_n(bool is_unary)
+std::shared_ptr<OperatorNode> Parser::operator_n(bool is_unary)
 {
 	if (!curr_tk->is_operator())
 	{
 		return nullptr;
 	}
-	if (is_unary && curr_tk->lexeme() == "+")
-	{
-		consume_tk(); // Skip the unary plus (no effect)
-		return nullptr;
-	}
 
-	auto op = operators.find(curr_tk->lexeme());
-	if (!op)
+	auto [index, op] = operators.find(curr_tk->lexeme(), is_unary);
+	if (index == -1)
 	{
 		if (is_unary)
 		{
@@ -230,12 +225,13 @@ std::unique_ptr<OperatorNode> Parser::operator_n(bool is_unary)
 	}
 
 	auto operator_node = std::make_unique<OperatorNode>(op);
+	operator_node->operator_index = index;
 	operator_node->location = curr_tk->location();
 	operator_node->length = curr_tk->lexeme().size();
 	return operator_node;
 }
 
-std::unique_ptr<ASTNode> Parser::primary_n(void)
+std::shared_ptr<ASTNode> Parser::primary_n(void)
 {
 	if (curr_tk->is_literal())
 	{
@@ -273,7 +269,7 @@ std::unique_ptr<ASTNode> Parser::primary_n(void)
 	return nullptr;
 }
 
-std::unique_ptr<FunctionCallNode> Parser::function_call_n(void)
+std::shared_ptr<FunctionCallNode> Parser::function_call_n(void)
 {
 	auto function_call = std::make_unique<FunctionCallNode>();
 	function_call->location = curr_tk->location();
@@ -301,7 +297,7 @@ std::unique_ptr<FunctionCallNode> Parser::function_call_n(void)
 	return function_call;
 }
 
-std::unique_ptr<IdentifierNode> Parser::identifier_n(void)
+std::shared_ptr<IdentifierNode> Parser::identifier_n(void)
 {
 	auto identifier = std::make_unique<IdentifierNode>(curr_tk->lexeme());
 	identifier->location = curr_tk->location();
@@ -309,7 +305,7 @@ std::unique_ptr<IdentifierNode> Parser::identifier_n(void)
 	return identifier;
 }
 
-std::unique_ptr<LiteralNode> Parser::literal_n(void)
+std::shared_ptr<LiteralNode> Parser::literal_n(void)
 {
 	auto literal = std::make_unique<LiteralNode>(curr_tk->lexeme());
 

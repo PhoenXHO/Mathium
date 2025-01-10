@@ -35,10 +35,14 @@ enum OpCode : uint8_t
 	OP_CALL_FUNCTION,
 
 	// Instruction to call a unary operator
-	// + operand: `index` (1 byte); the index of the operator in the current scope
+	// + operands:
+	//   - `operator_index` (1 byte); the index of the operator in the current scope
+	//   - `operator_implementation_index` (1 byte); the index of the implementation of the operator
 	OP_CALL_UNARY,
 	// Instruction to call a binary operator
-	// + operand: `index` (1 byte); the index of the operator in the current scope
+	// + operands:
+	//   - `operator_index` (1 byte); the index of the operator in the current scope
+	//   - `operator_implementation_index` (1 byte); the index of the implementation of the operator
 	OP_CALL_BINARY,
 
 	// Instruction to print the top of the stack (the top of the stack is popped)

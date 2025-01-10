@@ -1,16 +1,16 @@
 #include "function/function.hpp"
 
 
-FunctionImplentationPtr FunctionImplentationRegistry::define(const FunctionImplentationPtr & implementation)
+FunctionImplementationPtr FunctionImplementationRegistry::define(const FunctionImplementationPtr & implementation)
 {
 	implementation_indices[implementation->signature()] = implementations.size();
 	implementations.push_back(implementation);
 	return implementation;
 }
 
-FunctionImplentationRegistry::ImplementationMatchPtr FunctionImplentationRegistry::find_best_match(const FunctionSignature & signature)
+FunctionImplementationRegistry::MatchPtr FunctionImplementationRegistry::find_best_match(const FunctionSignature & signature)
 {
-	ImplementationMatchPtr best_match = std::make_shared<ImplementationMatch>(ImplementationMatch{
+	MatchPtr best_match = std::make_shared<Match>(Match{
 		0, {TypeCoercion::MatchLevel::INCOMPATIBLE, {}}
 	});
 

@@ -30,7 +30,7 @@ struct LiteralNode;
 // <statement> ::= <expression-statement> (for now)
 struct AST
 {
-	std::vector<std::unique_ptr<ASTNode>> statements;
+	std::vector<std::shared_ptr<ASTNode>> statements;
 
 	AST() = default;
 	~AST() = default;
@@ -71,9 +71,9 @@ struct ASTNode
 // <variable-declaration> ::= "let" [ <type> ] <identifier> [ ":=" <expression> ] [ ";" ]
 struct VariableDeclarationNode : public ASTNode
 {
-	std::unique_ptr<TypeNode> type;
-	std::unique_ptr<IdentifierNode> identifier;
-	std::unique_ptr<ASTNode> expression;
+	std::shared_ptr<TypeNode> type;
+	std::shared_ptr<IdentifierNode> identifier;
+	std::shared_ptr<ASTNode> expression;
 
 	bool needs_coercion = false;
 	size_t coercion_index = 0;
@@ -93,11 +93,11 @@ struct VariableDeclarationNode : public ASTNode
 // <expression-statement> ::= ( <expression> | <operand> ) [ ";" ]
 struct ExpressionStatementNode : public ASTNode
 {
-	std::unique_ptr<ASTNode> expression;
+	std::shared_ptr<ASTNode> expression;
 	bool print_expression = false;
 
 	ExpressionStatementNode() : ASTNode(Type::N_EXPRESSION_STATEMENT) {}
-	ExpressionStatementNode(std::unique_ptr<ASTNode> expression)
+	ExpressionStatementNode(std::shared_ptr<ASTNode> expression)
 		: ASTNode(Type::N_EXPRESSION_STATEMENT), expression(std::move(expression))
 	{}
 	~ExpressionStatementNode() = default;
@@ -111,15 +111,15 @@ struct ExpressionStatementNode : public ASTNode
 // <expression> ::= ( <operand> | <expression> ) <operator> ( <operand> | <expression> )
 struct ExpressionNode : public ASTNode
 {
-	std::unique_ptr<ASTNode> left;
-	std::unique_ptr<ASTNode> right;
-	std::unique_ptr<OperatorNode> op;
+	std::shared_ptr<ASTNode> left;
+	std::shared_ptr<ASTNode> right;
+	std::shared_ptr<OperatorNode> op;
 
 	ExpressionNode() : ASTNode(Type::N_EXPRESSION) {}
 	ExpressionNode(
-		std::unique_ptr<ASTNode> left,
-		std::unique_ptr<OperatorNode> op,
-		std::unique_ptr<ASTNode> right
+		std::shared_ptr<ASTNode> left,
+		std::shared_ptr<OperatorNode> op,
+		std::shared_ptr<ASTNode> right
 	) : ASTNode(Type::N_EXPRESSION), left(std::move(left)), op(std::move(op)), right(std::move(right))
 		{}
 	~ExpressionNode() = default;
@@ -134,8 +134,8 @@ struct ExpressionNode : public ASTNode
 // <primary> ::= <literal> | <operand> | <expression>
 struct OperandNode : public ASTNode
 {
-	std::unique_ptr<OperatorNode> op;
-	std::unique_ptr<ASTNode> primary;
+	std::shared_ptr<OperatorNode> op;
+	std::shared_ptr<ASTNode> primary;
 
 	OperandNode() : ASTNode(Type::N_OPERAND) {}
 	~OperandNode() = default;
@@ -149,11 +149,12 @@ struct OperandNode : public ASTNode
 // <operator> ::= <custom-operator> | <built-in-operator>
 struct OperatorNode : public ASTNode
 {
-	std::shared_ptr<Operator> op;
-	std::shared_ptr<OperatorImplentation> implementation; // To store the implementation of the operator for the given operands (for the compiler)
+	OperatorPtr op;
+	FunctionImplementationRegistry::MatchPtr impl; // To store the implementation of the operator for the given operands (for the compiler)
 	size_t operator_index = 0;
+	FunctionImplementationRegistry::MatchPtr match;
 
-	OperatorNode(std::shared_ptr<Operator> op) : ASTNode(Type::N_OPERATOR), op(op) {}
+	OperatorNode(OperatorPtr op) : ASTNode(Type::N_OPERATOR), op(op) {}
 	~OperatorNode() = default;
 
 	Fixity fixity(void) const
@@ -162,7 +163,7 @@ struct OperatorNode : public ASTNode
 	{ return op->associativity(); }
 	Precedence precedence(void) const
 	{ return op->precedence(); }
-	OperatorImplentationRegistry & implementations(void)
+	FunctionImplementationRegistry & implementations(void)
 	{ return op->implementations(); }
 
 	//* Debugging
@@ -174,10 +175,10 @@ struct OperatorNode : public ASTNode
 // <function-call> ::= <identifier> "(" [ <expression> [ "," <expression> ]* ] ")"
 struct FunctionCallNode : public ASTNode
 {
-	std::unique_ptr<IdentifierNode> identifier;
-	std::vector<std::unique_ptr<ASTNode>> arguments;
+	std::shared_ptr<IdentifierNode> identifier;
+	std::vector<std::shared_ptr<ASTNode>> arguments;
 	size_t function_index = 0;
-	FunctionImplentationRegistry::ImplementationMatchPtr match;
+	FunctionImplementationRegistry::MatchPtr match;
 
 	FunctionCallNode() : ASTNode(Type::N_FUNCTION_CALL) {}
 	~FunctionCallNode() = default;

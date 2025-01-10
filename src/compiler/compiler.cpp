@@ -110,18 +110,34 @@ void Compiler::compile_expression(const ASTNode * expression_n)
 {
 	switch (expression_n->type)
 	{
+	case ASTNode::Type::N_EXPRESSION:
+		{
+			auto expression = static_cast<const ExpressionNode *>(expression_n);
+			compile_binary(expression);
+		}
+		break;
 	case ASTNode::Type::N_OPERAND:
 		{
 			auto operand = static_cast<const OperandNode *>(expression_n);
 			compile_operand(operand);
 		}
 		break;
-	case ASTNode::Type::N_EXPRESSION:
+	case ASTNode::Type::N_FUNCTION_CALL:
 		{
-			auto expression = static_cast<const ExpressionNode *>(expression_n);
-			compile_expression(expression->left.get());
-			compile_expression(expression->right.get());
-			compile_binary_operator(expression->op.get());
+			auto function_call = static_cast<const FunctionCallNode *>(expression_n);
+			compile_function_call(function_call);
+		}
+		break;
+	case ASTNode::Type::N_IDENTIFIER:
+		{
+			auto identifier = static_cast<const IdentifierNode *>(expression_n);
+			compile_identifier(identifier);
+		}
+		break;
+	case ASTNode::Type::N_LITERAL:
+		{
+			auto literal = static_cast<const LiteralNode *>(expression_n);
+			compile_literal(literal);
 		}
 		break;
 
@@ -137,51 +153,24 @@ void Compiler::compile_expression(const ASTNode * expression_n)
 
 void Compiler::compile_operand(const OperandNode * operand_n)
 {
-	switch (operand_n->primary->type)
-	{
-	case ASTNode::Type::N_EXPRESSION:
-		{
-			compile_expression(operand_n->primary.get());
-		}
-		break;
-	case ASTNode::Type::N_OPERAND:
-		{
-			auto operand = static_cast<const OperandNode *>(operand_n->primary.get());
-			compile_operand(operand);
-		}
-		break;
-	case ASTNode::Type::N_FUNCTION_CALL:
-		{
-			auto function_call = static_cast<const FunctionCallNode *>(operand_n->primary.get());
-			compile_function_call(function_call);
-		}
-		break;
-	case ASTNode::Type::N_IDENTIFIER:
-		{
-			auto identifier = static_cast<const IdentifierNode *>(operand_n->primary.get());
-			compile_identifier(identifier);
-		}
-		break;
-	case ASTNode::Type::N_LITERAL:
-		{
-			auto literal = static_cast<const LiteralNode *>(operand_n->primary.get());
-			compile_literal(literal);
-		}
-		break;
-	}
-
-	// Compile the unary operator if it exists after the primary operand has been compiled
 	if (operand_n->op)
 	{
-		compile_unary_operator(operand_n->op.get());
+		compile_unary(operand_n);
+	}
+	else
+	{
+		compile_expression(operand_n->primary.get());
 	}
 }
 
 void Compiler::compile_operator(const OperatorNode * op, bool is_unary)
 {
-	//TODO: Update this code to use the operator registry in the current scope
-	auto & implementation = op->implementation;
-	if (operator_stack.size() >= UINT8_MAX)
+	// The implementation of this function will be changed:
+	// The left and right operands will be compiled first, and we'll check if coercion is needed
+	// Then we'll compile the operator and emit the OP_COERCE instruction if needed
+
+	size_t index = op->operator_index;
+	if (index >= UINT8_MAX)
 	{
 		// We have reached the maximum number of operators
 		globals::error_handler.log_compiletime_error({
@@ -191,16 +180,39 @@ void Compiler::compile_operator(const OperatorNode * op, bool is_unary)
 		}, true);
 		return;
 	}
-
-	operator_stack.push_back(implementation);
-	chunk.emit(is_unary ? OP_CALL_UNARY : OP_CALL_BINARY, operator_stack.size() - 1);
+	size_t impl_index = op->match->index;
+	if (impl_index >= UINT8_MAX)
+	{
+		// We have reached the maximum number of operator implementations
+		globals::error_handler.log_compiletime_error({
+			"Maximum number of operator implementations reached",
+			op->location,
+			op->length
+		}, true);
+		return;
+	}
+	
+	chunk.emit(is_unary ? OP_CALL_UNARY : OP_CALL_BINARY, index, impl_index);
 }
 
-void Compiler::compile_unary_operator(const OperatorNode * op)
-{ compile_operator(op, true); }
+void Compiler::compile_unary(const OperandNode * operand_n)
+{
+	std::vector<std::shared_ptr<ASTNode>> operands;
+	operands.push_back(std::move(operand_n->primary));
 
-void Compiler::compile_binary_operator(const OperatorNode * op)
-{ compile_operator(op); }
+	compile_arguments(operands, operand_n->op->match);
+	compile_operator(operand_n->op.get(), true);
+}
+
+void Compiler::compile_binary(const ExpressionNode * expression_n)
+{
+	std::vector<std::shared_ptr<ASTNode>> operands;
+	operands.push_back(std::move(expression_n->left));
+	operands.push_back(std::move(expression_n->right));
+
+	compile_arguments(operands, expression_n->op->match);
+	compile_operator(expression_n->op.get());
+}
 
 void Compiler::compile_function_call(const FunctionCallNode * function_call_n)
 {
@@ -228,7 +240,14 @@ void Compiler::compile_function_call(const FunctionCallNode * function_call_n)
 	}
 
 	auto & match = function_call_n->match;
-	for (size_t i = 0; i < function_call_n->arguments.size(); ++i)
+	compile_arguments(function_call_n->arguments, match);
+	chunk.emit(OP_CALL_FUNCTION, index, impl_index);
+}
+
+void Compiler::compile_arguments(const std::vector<std::shared_ptr<ASTNode>> & arguments_n,
+								 const FunctionImplementationRegistry::MatchPtr & match)
+{
+	for (int i = arguments_n.size() - 1; i >= 0; --i)
 	{
 		auto coercion = match->conversion.conversions[i];
 		auto effective_match_level = coercion->effective_match_level;
@@ -236,7 +255,7 @@ void Compiler::compile_function_call(const FunctionCallNode * function_call_n)
 		get_ref = effective_match_level == TypeCoercion::MatchLevel::REF ||
 				  effective_match_level == TypeCoercion::MatchLevel::REF_INHERITANCE;
 
-		compile_expression(function_call_n->arguments[i].get());
+		compile_expression(arguments_n[i].get());
 		// No else statement because we want to coerce the argument even if it is a reference
 		if (effective_match_level != TypeCoercion::MatchLevel::EXACT &&
 			effective_match_level != TypeCoercion::MatchLevel::REF)
@@ -245,8 +264,6 @@ void Compiler::compile_function_call(const FunctionCallNode * function_call_n)
 			chunk.emit(OP_COERCE, coercion_index);
 		}
 	}
-
-	chunk.emit(OP_CALL_FUNCTION, index, impl_index);
 }
 
 void Compiler::compile_identifier(const IdentifierNode * identifier_n)

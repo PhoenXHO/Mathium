@@ -22,17 +22,19 @@ class Compiler
 	size_t last_print = 0;
 	bool get_ref = false; // Flag to indicate that the next `OP_GET_SYMBOL` instruction should get a reference
 
-	void compile_statement            (const ASTNode *)                             ;
-	void compile_variable_declaration (const VariableDeclarationNode *)             ;
-	void compile_expression           (const ASTNode *)                             ;
-	void compile_operand              (const OperandNode *)                         ;
-	void compile_operator             (const OperatorNode *, bool is_unary = false) ;
-	void compile_unary_operator       (const OperatorNode *)                        ;
-	void compile_binary_operator      (const OperatorNode *)                        ;
-	void compile_function_call        (const FunctionCallNode *)                    ;
-	void compile_identifier           (const IdentifierNode *)                      ;
-	void compile_literal              (const LiteralNode *)                         ;
-	void compile_print                (bool print)                                  ;
+	void compile_statement            (const ASTNode *)                                  ;
+	void compile_variable_declaration (const VariableDeclarationNode *)                  ;
+	void compile_expression           (const ASTNode *)                                  ;
+	void compile_operand              (const OperandNode *)                              ;
+	void compile_operator             (const OperatorNode *, bool is_unary = false)      ;
+	void compile_unary                (const OperandNode *)                              ;
+	void compile_binary               (const ExpressionNode *)                           ;
+	void compile_function_call        (const FunctionCallNode *)                         ;
+	void compile_arguments			  (const std::vector<std::shared_ptr<ASTNode>> &,
+	                                   const FunctionImplementationRegistry::MatchPtr &) ;
+	void compile_identifier           (const IdentifierNode *)                           ;
+	void compile_literal              (const LiteralNode *)                              ;
+	void compile_print                (bool print)                                       ;
 
 public:
 	Compiler(Chunk & chunk, ConstantPool & constant_pool, std::shared_ptr<Scope> global_scope) :

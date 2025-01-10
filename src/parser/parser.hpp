@@ -51,16 +51,16 @@ class Parser
 		}
 	}
 
-	std::unique_ptr<ASTNode>                 statement_n(void)                 ;
-	std::unique_ptr<VariableDeclarationNode> variable_declaration_n(void)      ;
-	std::unique_ptr<ExpressionStatementNode> expression_statement_n(void)      ;
-	std::unique_ptr<ASTNode>                 expression_n(Precedence min_p)    ;
-	std::unique_ptr<ASTNode>                 operand_n(void)                   ;
-	std::unique_ptr<OperatorNode>            operator_n(bool is_unary = false) ;
-	std::unique_ptr<ASTNode>                 primary_n(void)                   ;
-	std::unique_ptr<FunctionCallNode>        function_call_n(void)             ;
-	std::unique_ptr<IdentifierNode>          identifier_n(void)                ;
-	std::unique_ptr<LiteralNode>             literal_n(void)                   ;
+	std::shared_ptr<ASTNode>                 statement_n(void)                 ;
+	std::shared_ptr<VariableDeclarationNode> variable_declaration_n(void)      ;
+	std::shared_ptr<ExpressionStatementNode> expression_statement_n(void)      ;
+	std::shared_ptr<ASTNode>                 expression_n(Precedence min_p)    ;
+	std::shared_ptr<ASTNode>                 operand_n(void)                   ;
+	std::shared_ptr<OperatorNode>            operator_n(bool is_unary = false) ;
+	std::shared_ptr<ASTNode>                 primary_n(void)                   ;
+	std::shared_ptr<FunctionCallNode>        function_call_n(void)             ;
+	std::shared_ptr<IdentifierNode>          identifier_n(void)                ;
+	std::shared_ptr<LiteralNode>             literal_n(void)                   ;
 
 public:
 	OperatorRegistry & operators;

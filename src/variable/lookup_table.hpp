@@ -60,13 +60,16 @@ public:
 #pragma region Operators
 	OperatorRegistry & get_operators(void)
 	{ return operators; }
-
+	
 	void init_builtin_operators(void)
 	{
 		operators.register_builtin_operators();
 	}
 
-	OperatorPtr find_operator(std::string_view op_symbol, bool is_unary = false) const
+	std::pair<size_t, OperatorPtr> find_operator(std::string_view op_symbol, bool is_unary = false) const
 	{ return operators.find(op_symbol, is_unary); }
+
+	OperatorPtr get_operator(size_t index, bool is_unary) const
+	{ return operators.find(index, is_unary); }
 #pragma endregion
 };

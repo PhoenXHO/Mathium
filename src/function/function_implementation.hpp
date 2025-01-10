@@ -11,11 +11,11 @@
 #include "function/function_signature.hpp"
 
 
-class FunctionImplentation;
-using FunctionImplentationPtr = std::shared_ptr<FunctionImplentation>;
+class FunctionImplementation;
+using FunctionImplementationPtr = std::shared_ptr<FunctionImplementation>;
 
 
-class FunctionImplentation : public ICallable
+class FunctionImplementation : public ICallable
 {
 protected:
 	FunctionSignature m_signature;
@@ -27,10 +27,10 @@ public:
 		F_USER_DEFINED // User-defined function
 	};
 
-	FunctionImplentation(const FunctionSignature & signature) :
+	FunctionImplementation(const FunctionSignature & signature) :
 		m_signature(signature)
 	{}
-	virtual ~FunctionImplentation() = default;
+	virtual ~FunctionImplementation() = default;
 
 	virtual FunctionType type() const = 0;
 
@@ -47,7 +47,7 @@ public:
 	{ return call(arguments); }
 };
 
-class BuiltinFunctionImplentation : public FunctionImplentation
+class BuiltinFunctionImplentation : public FunctionImplementation
 {
 	std::function<ObjectPtr(const std::vector<ObjectPtr> &)> m_function;
 
@@ -56,7 +56,7 @@ public:
 		const FunctionSignature & signature,
 		std::function<ObjectPtr(const std::vector<ObjectPtr> &)> function
 	) :
-		FunctionImplentation(signature),
+		FunctionImplementation(signature),
 		m_function(function)
 	{}
 	~BuiltinFunctionImplentation() = default;
@@ -68,6 +68,6 @@ public:
 	{ return m_function(arguments); }
 };
 
-class UserDefinedFunctionImplentation : public FunctionImplentation
+class UserDefinedFunctionImplentation : public FunctionImplementation
 {
 };

@@ -19,25 +19,25 @@ class Function;
 using FunctionPtr = std::shared_ptr<Function>;
 
 
-struct FunctionImplentationRegistry
+struct FunctionImplementationRegistry
 {
-	struct ImplementationMatch
+	struct Match
 	{
 		size_t index; // Index of the implementation
 		TypeCoercion::MatchResult conversion; // Conversion result
 	};
-	using ImplementationMatchPtr = std::shared_ptr<ImplementationMatch>;
+	using MatchPtr = std::shared_ptr<Match>;
 
 	std::unordered_map<FunctionSignature, size_t> implementation_indices;
-	std::vector<FunctionImplentationPtr> implementations;
+	std::vector<FunctionImplementationPtr> implementations;
 
-	FunctionImplentationRegistry() = default;
-	~FunctionImplentationRegistry() = default;
+	FunctionImplementationRegistry() = default;
+	~FunctionImplementationRegistry() = default;
 
-	FunctionImplentationPtr define(const FunctionImplentationPtr & implementation);
-	ImplementationMatchPtr find_best_match(const FunctionSignature & signature);
+	FunctionImplementationPtr define(const FunctionImplementationPtr & implementation);
+	MatchPtr find_best_match(const FunctionSignature & signature);
 
-	FunctionImplentationPtr operator[](size_t index) const
+	FunctionImplementationPtr operator[](size_t index) const
 	{ return implementations[index]; }
 
 	std::string to_string() const
@@ -54,10 +54,9 @@ struct FunctionImplentationRegistry
 
 class Function : public Object
 {
-	FunctionImplentationRegistry m_implementations;
-
 protected:
 	std::string m_name;
+	FunctionImplementationRegistry m_implementations;
 
 public:
 	Function(std::string_view name)
@@ -66,16 +65,16 @@ public:
 	~Function() = default;
 
 
-	FunctionImplentationRegistry & implementations()
+	FunctionImplementationRegistry & implementations()
 	{ return m_implementations; }
 	
-	FunctionImplentationPtr define(const FunctionImplentationPtr & implementation)
+	FunctionImplementationPtr define(const FunctionImplementationPtr & implementation)
 	{ return m_implementations.define(implementation); }
 
-	FunctionImplentationRegistry::ImplementationMatchPtr find_best_match(const FunctionSignature & signature)
+	FunctionImplementationRegistry::MatchPtr find_best_match(const FunctionSignature & signature)
 	{ return m_implementations.find_best_match(signature); }
 
-	FunctionImplentationPtr get_implementation(size_t index) const
+	FunctionImplementationPtr get_implementation(size_t index) const
 	{ return m_implementations[index]; }
 
 	std::string to_string() const

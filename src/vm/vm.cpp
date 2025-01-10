@@ -115,7 +115,7 @@ void VM::run(void)
 			auto function = variable->value()->as<Function>();
 			auto implementation = function->get_implementation(function_implementation_index);
 			
-			if (implementation->type() == FunctionImplentation::FunctionType::F_BUILTIN)
+			if (implementation->type() == FunctionImplementation::FunctionType::F_BUILTIN)
 			{
 				auto builtin = std::dynamic_pointer_cast<BuiltinFunctionImplentation>(implementation);
 				size_t arity = builtin->arity();
@@ -125,7 +125,7 @@ void VM::run(void)
 					arguments.push_back(stack.top());
 					stack.pop();
 				}
-				std::reverse(arguments.begin(), arguments.end());
+				//std::reverse(arguments.begin(), arguments.end());
 				auto result = builtin->call(arguments);
 				stack.push(result);
 			}
@@ -138,26 +138,38 @@ void VM::run(void)
 	case OP_CALL_UNARY:
 		{
 			auto index = READ_BYTE();
-			auto & implementation = compiler->get_operator(index);
+			auto implementation_index = READ_BYTE();
+			auto op = current_scope->get_operator(index, true);
+			auto implementation = op->get_implementation(implementation_index);
+
+			std::vector<ObjectPtr> arguments;
+			
 			auto operand = stack.top();
 			stack.pop();
-			
-			std::shared_ptr<BuiltinOperatorImplentation> impl = std::dynamic_pointer_cast<BuiltinOperatorImplentation>(implementation);
-			auto result = impl->execute(operand, nullptr);
+			arguments.push_back(operand);
+
+			auto result = implementation->call(arguments);
 			stack.push(result);
 		}
 		break;
 	case OP_CALL_BINARY:
 		{
 			auto index = READ_BYTE();
-			auto & implementation = compiler->get_operator(index);
-			auto right = stack.top();
-			stack.pop();
+			auto implementation_index = READ_BYTE();
+			auto op = current_scope->get_operator(index);
+			auto implementation = op->get_implementation(implementation_index);
+
+			std::vector<ObjectPtr> arguments;
+
 			auto left = stack.top();
 			stack.pop();
-			
-			std::shared_ptr<BuiltinOperatorImplentation> impl = std::dynamic_pointer_cast<BuiltinOperatorImplentation>(implementation);
-			auto result = impl->execute(left, right);
+			arguments.push_back(left);
+
+			auto right = stack.top();
+			stack.pop();
+			arguments.push_back(right);
+
+			auto result = implementation->call(arguments);
 			stack.push(result);
 		}
 		break;

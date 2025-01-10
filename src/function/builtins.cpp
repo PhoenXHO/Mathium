@@ -12,7 +12,7 @@
 
 void LookupTable::init_builtin_functions(void)
 {
-	FunctionImplentationPtr print0 = std::make_shared<BuiltinFunctionImplentation>(
+	FunctionImplementationPtr print0 = std::make_shared<BuiltinFunctionImplentation>(
 		FunctionSignature(),
 		[](const std::vector<ObjectPtr> & arguments) -> ObjectPtr
 		{
@@ -20,7 +20,7 @@ void LookupTable::init_builtin_functions(void)
 			return Object::none;
 		}
 	);
-	FunctionImplentationPtr print1 = std::make_shared<BuiltinFunctionImplentation>(
+	FunctionImplementationPtr print1 = std::make_shared<BuiltinFunctionImplentation>(
 		FunctionSignature({ { "object", builtins::mathobj_class } }),
 		[](const std::vector<ObjectPtr> & arguments) -> ObjectPtr
 		{
@@ -28,7 +28,7 @@ void LookupTable::init_builtin_functions(void)
 			return Object::none;
 		}
 	);
-	FunctionImplentationPtr print2 = std::make_shared<BuiltinFunctionImplentation>(
+	FunctionImplementationPtr print2 = std::make_shared<BuiltinFunctionImplentation>(
 		FunctionSignature({ { "object1", builtins::mathobj_class }, { "object2", builtins::mathobj_class } }),
 		[](const std::vector<ObjectPtr> & arguments) -> ObjectPtr
 		{
@@ -47,7 +47,7 @@ void LookupTable::init_builtin_functions(void)
 
 
 	// Testing reference parameters
-	FunctionImplentationPtr func = std::make_shared<BuiltinFunctionImplentation>(
+	FunctionImplementationPtr func = std::make_shared<BuiltinFunctionImplentation>(
 		FunctionSignature({
 			{ "x", { builtins::integer_class, Type::Qualifier::REF } }, // Non-const reference of type `Integer`
 			{ "y", builtins::integer_class }

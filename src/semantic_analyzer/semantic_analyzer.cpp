@@ -129,18 +129,14 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_expression(Expression
 	AnalysisResult right = analyze(expression->right.get());
 
 	//TODO: Put this in a separate method
-	// Find the candidate operator implementation for the given operands
-	// If a candidate is found, return the result of the operation
-	// If no candidate is found, log an error
 	auto implentations = expression->op->implementations();
-	auto impl = implentations.find_most_specific(left.cls, right.cls);
-	if (impl)
-	{
-		// Store the implementation for the compiler
-		expression->op->implementation = impl;
-		return impl->result_class();
-	}
-	else
+	auto signature = FunctionSignature({
+		{ "", left },
+		{ "", right }
+	});
+	auto match = implentations.find_best_match(signature);
+
+	if (match->conversion.match_level == TypeCoercion::MatchLevel::INCOMPATIBLE)
 	{
 		globals::error_handler.log_semantic_error({
 			"No operator implementation found for the given operands",
@@ -150,7 +146,28 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_expression(Expression
 		}, true);
 	}
 
-	return { builtins::none_class };
+	auto & op = expression->op->op;
+	if (match->conversion.match_level == TypeCoercion::MatchLevel::LOSSY)
+	{
+		// Look for the lossy conversions
+		for (size_t i = 0; i < match->conversion.conversions.size(); ++i)
+		{
+			if (match->conversion.conversions[i]->effective_match_level == TypeCoercion::MatchLevel::LOSSY)
+			{
+				auto & from = signature.parameters[i].second;
+				auto & to = op->get_implementation(match->index)->signature().parameters[i].second;
+				globals::error_handler.log_warning({
+					"Lossy conversion from '" + from.to_string() + "' to '" + to.to_string() + "'",
+					expression->right->location,
+					expression->right->length
+				});
+			}
+		}
+	}
+
+	// Store the index of the operator and the match conversions for the compiler
+	expression->op->match = match;
+	return op->get_implementation(match->index)->return_type();
 }
 
 SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_operand(OperandNode * operand)
@@ -163,18 +180,13 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_operand(OperandNode *
 	}
 
 	//TODO: Put this in a separate method
-	// Find the candidate operator implementation for the given operands
-	// If a candidate is found, return the result of the operation
-	// If no candidate is found, log an error
 	auto implentations = operand->op->implementations();
-	auto impl = implentations.find_most_specific(primary.cls, builtins::none_class);
-	if (impl)
-	{
-		// Store the implementation for the compiler
-		operand->op->implementation = impl;
-		return impl->result_class();
-	}
-	else
+	auto signature = FunctionSignature({
+		{ "", primary }
+	});
+	auto match = implentations.find_best_match(signature);
+
+	if (match->conversion.match_level == TypeCoercion::MatchLevel::INCOMPATIBLE)
 	{
 		globals::error_handler.log_semantic_error({
 			"No operator implementation found for the given operand",
@@ -184,7 +196,28 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_operand(OperandNode *
 		}, true);
 	}
 
-	return { builtins::none_class };
+	auto & op = operand->op->op;
+	if (match->conversion.match_level == TypeCoercion::MatchLevel::LOSSY)
+	{
+		// Look for the lossy conversions
+		for (size_t i = 0; i < match->conversion.conversions.size(); ++i)
+		{
+			if (match->conversion.conversions[i]->effective_match_level == TypeCoercion::MatchLevel::LOSSY)
+			{
+				auto & from = signature.parameters[i].second;
+				auto & to = op->get_implementation(match->index)->signature().parameters[i].second;
+				globals::error_handler.log_warning({
+					"Lossy conversion from '" + from.to_string() + "' to '" + to.to_string() + "'",
+					operand->primary->location,
+					operand->primary->length
+				});
+			}
+		}
+	}
+
+	// Store the index of the operator and the match conversions for the compiler
+	operand->op->match = match;
+	return op->get_implementation(match->index)->return_type();
 }
 
 SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_function_call(FunctionCallNode * function_call)

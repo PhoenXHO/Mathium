@@ -83,13 +83,17 @@ std::vector<uint8_t>::const_iterator Chunk::disassemble_instruction(std::vector<
 	case OP_CALL_UNARY:
 		std::cout << "CALL_UNARY"
 				  << std::setw(9) << std::setfill(' ') << std::right
-				  << static_cast<int>(*(ip + 1)) << std::left;
-		return ip + 2;
+				  << static_cast<int>(*(ip + 1)) << std::left
+				  << "  " << static_cast<int>(*(ip + 2))
+				  << "  " << current_scope->get_operator(static_cast<int>(*(ip + 1)), true)->to_string();
+		return ip + 3;
 	case OP_CALL_BINARY:
 		std::cout << "CALL_BINARY"
 				  << std::setw(9) << std::setfill(' ') << std::right
-				  << static_cast<int>(*(ip + 1)) << std::left;
-		return ip + 2;
+				  << static_cast<int>(*(ip + 1)) << std::left
+				  << "  " << static_cast<int>(*(ip + 2))
+				  << "  " << current_scope->get_operator(static_cast<int>(*(ip + 1)))->to_string();
+		return ip + 3;
 
 	case OP_PRINT:
 		std::cout << "PRINT";
