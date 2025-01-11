@@ -128,7 +128,7 @@ target_link_libraries(Mathium ${GMP_LIBRARIES} ${MPFR_LIBRARIES})
 
 target_include_directories(Mathium PRIVATE
 	"${PROJECT_BINARY_DIR}"
-	"${CMAKE_CURRENT_SOURCE_DIR}/src"
+	"${CMAKE_CURRENT_SOURCE_DIR}/include"
 	#${HEADER_PATHS}
 )
 
