@@ -52,23 +52,28 @@ _Note: This project is a complete rewrite of the Mathium interpreter, with clean
 ## Getting Started
 
 ### Prerequisites
-- CMake 3.29.7
-- Boost 1.74.0
+- CMake 3.29.7 or higher
+- Boost 1.74.0 or higher
 - GMP (GNU Multiple Precision Arithmetic Library)
 - MPFR (Multiple Precision Floating-Point Reliable Library)
+- A C++20 compatible compiler (e.g., g++)
 
 ### Building the Project
 
 To build the Mathium interpreter, follow these steps:
 
 1. **Install the Prerequisites**:
-	- On Ubuntu:
+	- On Ubuntu/Debian:
 		```sh
-		sudo apt-get install cmake libboost-all-dev libgmp-dev libmpfr-dev
+		# Update package list
+		sudo apt-get update
+		
+		# Install required packages
+		sudo apt-get install build-essential libboost-all-dev libgmp-dev libmpfr-dev
 		```
 	- On Fedora:
 		```sh
-		sudo dnf install cmake boost-devel gmp-devel mpfr-devel
+		sudo dnf install cmake boost-devel gmp-devel mpfr-devel gcc-c++
 		```
 	- On macOS (using Homebrew):
 		```sh
@@ -79,12 +84,13 @@ To build the Mathium interpreter, follow these steps:
 		- Download and install Boost from [boost.org](https://www.boost.org/users/download/)
 		- Download and install GMP from [gmplib.org](https://gmplib.org/)
 		- Download and install MPFR from [mpfr.org](https://www.mpfr.org/)
+		- Ensure a C++20 compiler like MinGW or MSVC is installed
 		- _Add the paths to the libraries to the system environment variables_
 
 2. **Build the Project**:
 	1. Clone the repository:
 		```sh
-		git clone https://github.com/PhoenXHO/MathLang.git
+		git clone https://github.com/PhoenXHO/Mathium.git
 		cd Mathium
 		```
 
