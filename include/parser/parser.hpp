@@ -37,6 +37,11 @@ class Parser
 	/// @param types: A list of token types to expect.
 	/// @param message: An optional message to display if the token is not of the expected type.
 	void expect_tk(const std::initializer_list<Token::Type> & types, std::string_view message = "");
+	/// @brief Expect a non-null AST node.
+	/// @param node: The AST node to check.
+	/// @param message: An optional message to display if the node is null.
+	template<typename T>
+	void expect_node(const std::shared_ptr<T> & node, std::string_view message);
 	/// @brief Check if the current token is a semicolon.
 	/// @return `true` if the current token is a semicolon, `false` otherwise.
 	bool check_semicolon(void)

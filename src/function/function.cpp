@@ -8,7 +8,7 @@ FunctionImplementationPtr FunctionImplementationRegistry::define(const FunctionI
 	return implementation;
 }
 
-FunctionImplementationRegistry::MatchPtr FunctionImplementationRegistry::find_best_match(const FunctionSignature & signature)
+FunctionImplementationRegistry::MatchPtr FunctionImplementationRegistry::find_best_match(const FunctionSignature & signature) const
 {
 	MatchPtr best_match = std::make_shared<Match>(Match{
 		0, {TypeCoercion::MatchLevel::INCOMPATIBLE, {}}

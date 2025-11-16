@@ -35,7 +35,7 @@ struct FunctionImplementationRegistry
 	~FunctionImplementationRegistry() = default;
 
 	FunctionImplementationPtr define(const FunctionImplementationPtr & implementation);
-	MatchPtr find_best_match(const FunctionSignature & signature);
+	MatchPtr find_best_match(const FunctionSignature & signature) const;
 
 	FunctionImplementationPtr operator[](size_t index) const
 	{ return implementations[index]; }

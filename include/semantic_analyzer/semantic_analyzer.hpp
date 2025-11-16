@@ -7,6 +7,7 @@
 #include "scope/scope.hpp"
 #include "class/class.hpp"
 #include "type/type.hpp"
+#include "function/function.hpp"
 
 
 // This class will be responsible for type checking and other semantic analysis tasks
@@ -15,10 +16,13 @@ class SemanticAnalyzer
 	using AnalysisResult = Type;
 
 	std::shared_ptr<Scope> global_scope;
-	std::shared_ptr<Scope> current_scope = global_scope;
+	std::shared_ptr<Scope> current_scope;
 
 public:
-	SemanticAnalyzer(std::shared_ptr<Scope> global_scope) : global_scope(global_scope) {}
+	SemanticAnalyzer(std::shared_ptr<Scope> global_scope) :
+		global_scope(global_scope),
+		current_scope(global_scope)
+	{}
 	~SemanticAnalyzer() = default;
 
 	void reset(void)
@@ -37,4 +41,23 @@ private:
 	AnalysisResult analyze_identifier           (IdentifierNode * identifier)                    ;
 	AnalysisResult analyze_type                 (TypeNode * type)                                ;
 	AnalysisResult analyze_literal              (LiteralNode * literal)                          ;
+
+	FunctionImplementationRegistry::MatchPtr resolve_overload(
+		const FunctionImplementationRegistry & implementations,
+		const FunctionPtr & function,
+		const FunctionSignature & signature,
+		const std::vector<std::shared_ptr<ASTNode>> & argument_nodes // For error reporting
+	);
+
+	void check_type_compatibility(
+		const Type & expected,
+		const Type & actual,
+		const ASTNode * node // For error reporting
+	);
+
+	std::pair<size_t, VariablePtr> find_variable_in_current_scope(
+		std::string_view name,
+		std::string_view error_message,
+		const ASTNode * node
+	);
 };

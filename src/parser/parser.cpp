@@ -151,10 +151,7 @@ std::shared_ptr<ASTNode> Parser::expression_n(Precedence min_p)
 		if (op->associativity() == Associativity::A_LEFT) // Left-associative
 		{
 			auto right = expression_n(static_cast<Precedence>(op->precedence() + 1));
-			if (!right)
-			{
-				expect_tk(Token::Type::T_NONE, "Expected an expression");
-			}
+			expect_node(right, "Expected an expression");
 
 			auto location = left->location;
 			left = std::make_unique<ExpressionNode>(std::move(left), std::move(op), std::move(right));
@@ -163,10 +160,7 @@ std::shared_ptr<ASTNode> Parser::expression_n(Precedence min_p)
 		else if (op->associativity() == Associativity::A_RIGHT) // Right-associative
 		{
 			auto right = expression_n(op->precedence());
-			if (!right)
-			{
-				expect_tk(Token::Type::T_NONE, "Expected an expression");
-			}
+			expect_node(right, "Expected an expression");
 
 			left = std::make_unique<ExpressionNode>(std::move(left), std::move(op), std::move(right));
 		}
@@ -254,10 +248,7 @@ std::shared_ptr<ASTNode> Parser::primary_n(void)
 
 		consume_tk(); // Consume the left parenthesis
 		auto expression = expression_n(Precedence::P_MIN);
-		if (!expression)
-		{
-			expect_tk(Token::Type::T_NONE, "Expected an expression");
-		}
+		expect_node(expression, "Expected an expression");
 		expect_tk(Token::Type::T_RIGHT_PAREN, "Expected a right parenthesis");
 		// We don't need to consume the right parenthesis token because it will be consumed in the `expression_n` function
 
@@ -281,10 +272,7 @@ std::shared_ptr<FunctionCallNode> Parser::function_call_n(void)
 	while (curr_tk->type() != Token::Type::T_RIGHT_PAREN)
 	{
 		auto expression = expression_n(Precedence::P_MIN);
-		if (!expression)
-		{
-			expect_tk(Token::Type::T_NONE, "Expected an expression");
-		}
+		expect_node(expression, "Expected an expression");
 
 		function_call->arguments.push_back(std::move(expression));
 		if (curr_tk->type() == Token::Type::T_COMMA)
@@ -366,6 +354,16 @@ void Parser::expect_tk(const std::initializer_list<Token::Type> & types, std::st
 		curr_tk->location(),
 		curr_tk->lexeme().size()
 	}, true);
+}
+
+template<typename T>
+void Parser::expect_node(const std::shared_ptr<T> & node, std::string_view message)
+{
+	if (!node)
+	{
+		panic_mode = true;
+		expect_tk(Token::Type::T_NONE, message);
+	}
 }
 
 bool Parser::consume_tk(void)

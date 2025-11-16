@@ -128,13 +128,20 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_expression(Expression
 	AnalysisResult left = analyze(expression->left.get());
 	AnalysisResult right = analyze(expression->right.get());
 
-	//TODO: Put this in a separate method
-	auto implentations = expression->op->implementations();
+	// Get all implementations of the operator
+	auto implementations = expression->op->implementations();
 	auto signature = FunctionSignature({
 		{ "", left },
 		{ "", right }
 	});
-	auto match = implentations.find_best_match(signature);
+
+	// Find the most specific implementation of the operator for the given signature
+	auto match = resolve_overload(
+		implementations,
+		expression->op->op, // The operator function inside the OperatorNode
+		signature,
+		{ expression->left, expression->right } // Operand nodes for error reporting
+	);
 
 	if (match->conversion.match_level == TypeCoercion::MatchLevel::INCOMPATIBLE)
 	{
@@ -146,28 +153,9 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_expression(Expression
 		}, true);
 	}
 
-	auto & op = expression->op->op;
-	if (match->conversion.match_level == TypeCoercion::MatchLevel::LOSSY)
-	{
-		// Look for the lossy conversions
-		for (size_t i = 0; i < match->conversion.conversions.size(); ++i)
-		{
-			if (match->conversion.conversions[i]->effective_match_level == TypeCoercion::MatchLevel::LOSSY)
-			{
-				auto & from = signature.parameters[i].second;
-				auto & to = op->get_implementation(match->index)->signature().parameters[i].second;
-				globals::error_handler.log_warning({
-					"Lossy conversion from '" + from.to_string() + "' to '" + to.to_string() + "'",
-					expression->right->location,
-					expression->right->length
-				});
-			}
-		}
-	}
-
 	// Store the index of the operator and the match conversions for the compiler
 	expression->op->match = match;
-	return op->get_implementation(match->index)->return_type();
+	return expression->op->op->get_implementation(match->index)->return_type();
 }
 
 SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_operand(OperandNode * operand)
@@ -179,12 +167,18 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_operand(OperandNode *
 		return primary;
 	}
 
-	//TODO: Put this in a separate method
-	auto implentations = operand->op->implementations();
+	auto implementations = operand->op->implementations();
 	auto signature = FunctionSignature({
 		{ "", primary }
 	});
-	auto match = implentations.find_best_match(signature);
+
+	// Find the most specific implementation of the operator for the given signature
+	auto match = resolve_overload(
+		implementations,
+		operand->op->op, // The operator function inside the OperatorNode
+		signature,
+		{ operand->primary } // Operand node for error reporting
+	);
 
 	if (match->conversion.match_level == TypeCoercion::MatchLevel::INCOMPATIBLE)
 	{
@@ -196,42 +190,20 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_operand(OperandNode *
 		}, true);
 	}
 
-	auto & op = operand->op->op;
-	if (match->conversion.match_level == TypeCoercion::MatchLevel::LOSSY)
-	{
-		// Look for the lossy conversions
-		for (size_t i = 0; i < match->conversion.conversions.size(); ++i)
-		{
-			if (match->conversion.conversions[i]->effective_match_level == TypeCoercion::MatchLevel::LOSSY)
-			{
-				auto & from = signature.parameters[i].second;
-				auto & to = op->get_implementation(match->index)->signature().parameters[i].second;
-				globals::error_handler.log_warning({
-					"Lossy conversion from '" + from.to_string() + "' to '" + to.to_string() + "'",
-					operand->primary->location,
-					operand->primary->length
-				});
-			}
-		}
-	}
-
 	// Store the index of the operator and the match conversions for the compiler
 	operand->op->match = match;
-	return op->get_implementation(match->index)->return_type();
+	return operand->op->op->get_implementation(match->index)->return_type();
 }
 
 SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_function_call(FunctionCallNode * function_call)
 {
-	auto [index, variable] = current_scope->find_variable(function_call->identifier->name);
-	if (index == -1)
-	{
-		globals::error_handler.log_semantic_error({
-			"Symbol '" + std::string(function_call->identifier->name) + "' is not defined",
-			function_call->identifier->location,
-			function_call->identifier->length
-		}, true);
-	}
-	else if (!variable->is_function())
+	auto [index, variable] = find_variable_in_current_scope(
+		function_call->identifier->name,
+		"Symbol '" + std::string(function_call->identifier->name) + "' is not defined",
+		function_call->identifier.get() // Identifier node for error reporting
+	);
+	
+	if (!variable->is_function())
 	{
 		globals::error_handler.log_semantic_error({
 			"Symbol '" + std::string(function_call->identifier->name) + "' is not a function",
@@ -251,7 +223,13 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_function_call(Functio
 	}
 
 	// Find the most specific implementation of the function for the given signature
-	auto match = function->find_best_match(signature);
+	auto match = resolve_overload(
+		function->implementations(),
+		function,
+		signature,
+		function_call->arguments
+	);
+
 	if (match->conversion.match_level == TypeCoercion::MatchLevel::INCOMPATIBLE)
 	{
 		globals::error_handler.log_semantic_error({
@@ -263,24 +241,6 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_function_call(Functio
 		}, true);
 	}
 
-	if (match->conversion.match_level == TypeCoercion::MatchLevel::LOSSY)
-	{
-		// Look for the lossy conversions
-		for (size_t i = 0; i < match->conversion.conversions.size(); ++i)
-		{
-			if (match->conversion.conversions[i]->effective_match_level == TypeCoercion::MatchLevel::LOSSY)
-			{
-				auto & from = signature.parameters[i].second;
-				auto & to = function->get_implementation(match->index)->signature().parameters[i].second;
-				globals::error_handler.log_warning({
-					"Lossy conversion from '" + from.to_string() + "' to '" + to.to_string() + "'",
-					function_call->arguments[i]->location,
-					function_call->arguments[i]->length
-				});
-			}
-		}
-	}
-
 	// Store the index of the function and the match conversions for the compiler
 	function_call->function_index = index;
 	function_call->match = match;
@@ -289,15 +249,11 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_function_call(Functio
 
 SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_identifier(IdentifierNode * identifier)
 {
-	auto [index, variable] = current_scope->find_variable(identifier->name);
-	if (index == -1)
-	{
-		globals::error_handler.log_semantic_error({
-			"Symbol '" + std::string(identifier->name) + "' is not defined",
-			identifier->location,
-			identifier->length
-		}, true);
-	}
+	auto [index, variable] = find_variable_in_current_scope(
+		identifier->name,
+		"Symbol '" + std::string(identifier->name) + "' is not defined",
+		identifier // Identifier node for error reporting
+	);
 
 	identifier->variable_index = index;
 	return { variable->get_class(), Type::Qualifier::REF };
@@ -305,15 +261,11 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_identifier(Identifier
 
 SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_type(TypeNode * type)
 {
-	auto [index, variable] = current_scope->find_variable(type->name);
-	if (index == -1)
-	{
-		globals::error_handler.log_semantic_error({
-			"Type '" + std::string(type->name) + "' is not defined",
-			type->location,
-			type->length
-		}, true);
-	}
+	auto [index, variable] = find_variable_in_current_scope(
+		type->name,
+		"Type '" + std::string(type->name) + "' is not defined",
+		type // Type node for error reporting
+	);
 
 	if (!variable->is_class())
 	{
@@ -331,4 +283,82 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_type(TypeNode * type)
 SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_literal(LiteralNode * literal)
 {
 	return literal->cls;
+}
+	
+FunctionImplementationRegistry::MatchPtr SemanticAnalyzer::resolve_overload(
+	const FunctionImplementationRegistry & implementations,
+	const FunctionPtr & function,
+	const FunctionSignature & signature,
+	const std::vector<std::shared_ptr<ASTNode>> & argument_nodes
+)
+{
+	auto match = implementations.find_best_match(signature);
+
+	if (match->conversion.match_level == TypeCoercion::MatchLevel::LOSSY)
+	{
+		// Look for the lossy conversions
+		for (size_t i = 0; i < match->conversion.conversions.size(); ++i)
+		{
+			if (match->conversion.conversions[i]->effective_match_level == TypeCoercion::MatchLevel::LOSSY)
+			{
+				auto & from = signature.parameters[i].second;
+				auto & to = function->get_implementation(match->index)->signature().parameters[i].second;
+				globals::error_handler.log_warning({
+					"Lossy conversion from '" + from.to_string() + "' to '" + to.to_string() + "'",
+					argument_nodes[i]->location,
+					argument_nodes[i]->length
+				});
+			}
+		}
+	}
+
+	return match;
+}
+
+void SemanticAnalyzer::check_type_compatibility(
+	const Type & expected,
+	const Type & actual,
+	const ASTNode * node
+)
+{
+	// Try to find a coercion path
+	auto coercion_path = TypeCoercion::instance().find_best_coercion_path(actual.cls, expected.cls);
+
+	// If the coercion path is incompatible, log an error
+	if (coercion_path->effective_match_level == TypeCoercion::MatchLevel::INCOMPATIBLE)
+	{
+		globals::error_handler.log_semantic_error({
+			"Cannot convert '" + actual.cls->name() + "' to '" + expected.cls->name() + "'",
+			node->location,
+			node->length
+		}, true);
+	}
+
+	// If the coercion is lossy, log a warning
+	if (coercion_path->effective_match_level == TypeCoercion::MatchLevel::LOSSY)
+	{
+		globals::error_handler.log_warning({
+			"Lossy conversion from '" + actual.cls->name() + "' to '" + expected.cls->name() + "'",
+			node->location,
+			node->length
+		});
+	}
+}
+
+std::pair<size_t, VariablePtr> SemanticAnalyzer::find_variable_in_current_scope(
+	std::string_view name,
+	std::string_view error_message,
+	const ASTNode * node
+)
+{
+	auto [index, variable] = current_scope->find_variable(name);
+	if (index == -1)
+	{
+		globals::error_handler.log_semantic_error({
+			std::string(error_message),
+			node->location,
+			node->length
+		}, true);
+	}
+	return { index, variable };
 }
