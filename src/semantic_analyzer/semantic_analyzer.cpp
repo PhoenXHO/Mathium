@@ -74,28 +74,12 @@ SemanticAnalyzer::AnalysisResult SemanticAnalyzer::analyze_variable_declaration(
 	auto result = analyze(variable_declaration->expression.get());
 	if (type)
 	{
-		// Try to find a coercion path
-		auto coercion_path = TypeCoercion::instance().find_best_coercion_path(result.cls, type);
-
-		// If the coercion path is incompatible, log an error
-		if (coercion_path->effective_match_level == TypeCoercion::MatchLevel::INCOMPATIBLE)
-		{
-			globals::error_handler.log_semantic_error({
-				"Cannot convert '" + result.cls->name() + "' to '" + type->name() + "'",
-				variable_declaration->expression->location,
-				variable_declaration->expression->length
-			}, true);
-		}
-
-		// If the coercion is lossy, log a warning
-		if (coercion_path->effective_match_level == TypeCoercion::MatchLevel::LOSSY)
-		{
-			globals::error_handler.log_warning({
-				"Lossy conversion from '" + result.cls->name() + "' to '" + type->name() + "'",
-				variable_declaration->expression->location,
-				variable_declaration->expression->length
-			});
-		}
+		// Use the helper to check type compatibility and handle errors/warnings
+		auto coercion_path = check_type_compatibility(
+			type,
+			result.cls,
+			variable_declaration->expression.get()
+		);
 
 		// If the match level is not exact, store the coercion path index for the compiler
 		if (coercion_path->effective_match_level != TypeCoercion::MatchLevel::EXACT)
@@ -315,14 +299,14 @@ FunctionImplementationRegistry::MatchPtr SemanticAnalyzer::resolve_overload(
 	return match;
 }
 
-void SemanticAnalyzer::check_type_compatibility(
+TypeCoercion::CoercionPathPtr SemanticAnalyzer::check_type_compatibility(
 	const Type & expected,
 	const Type & actual,
 	const ASTNode * node
 )
 {
 	// Try to find a coercion path
-	auto coercion_path = TypeCoercion::instance().find_best_coercion_path(actual.cls, expected.cls);
+	auto coercion_path = TypeCoercion::instance().find_best_coercion_path(actual, expected);
 
 	// If the coercion path is incompatible, log an error
 	if (coercion_path->effective_match_level == TypeCoercion::MatchLevel::INCOMPATIBLE)
@@ -343,6 +327,8 @@ void SemanticAnalyzer::check_type_compatibility(
 			node->length
 		});
 	}
+
+	return coercion_path;
 }
 
 std::pair<size_t, VariablePtr> SemanticAnalyzer::find_variable_in_current_scope(
@@ -359,6 +345,7 @@ std::pair<size_t, VariablePtr> SemanticAnalyzer::find_variable_in_current_scope(
 			node->location,
 			node->length
 		}, true);
+		// The error is fatal, so we won't reach here
 	}
 	return { index, variable };
 }

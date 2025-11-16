@@ -49,7 +49,7 @@ private:
 		const std::vector<std::shared_ptr<ASTNode>> & argument_nodes // For error reporting
 	);
 
-	void check_type_compatibility(
+	TypeCoercion::CoercionPathPtr check_type_compatibility(
 		const Type & expected,
 		const Type & actual,
 		const ASTNode * node // For error reporting
