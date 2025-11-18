@@ -1,6 +1,6 @@
 #include "util/hash.hpp"
-#include "type/type.hpp"
-#include "function/function_signature.hpp"
+#include "semantic/type/type.hpp"
+#include "core/function/function_signature.hpp"
 
 
 namespace std

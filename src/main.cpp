@@ -8,9 +8,9 @@
 
 #include "mathium_config.hpp"
 
-#include "vm/vm.hpp"
+#include "runtime/vm/vm.hpp"
 #include "util/config.hpp"
-#include "debug/verbose.hpp"
+#include "util/debug/verbose.hpp"
 
 
 #define EXTENSION ".mthx"
@@ -30,11 +30,6 @@ void repl(void);
 bool get_continuation(std::string & source);
 void check_exit(std::string_view source);
 
-
-namespace globals
-{
-	std::string_view source;
-}
 
 bool version_printed = false;
 

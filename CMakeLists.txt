@@ -98,37 +98,43 @@ enable_testing()
 
 
 
-# Add the test executable target
+# Create an object library for core sources (exclude main.cpp)
+file(GLOB_RECURSE SOURCES "src/*.cpp")
+list(FILTER SOURCES EXCLUDE REGEX "src/main.cpp")
+
+add_library(MathiumCore OBJECT ${SOURCES})
+
+# Set include directories for the core library
+target_include_directories(MathiumCore PUBLIC
+	"${CMAKE_CURRENT_SOURCE_DIR}/src"
+	"${CMAKE_CURRENT_BINARY_DIR}" # For mathium_config.hpp
+)
+
+# Link dependencies to the core library
+foreach(BOOST_COMPONENT ${BOOST_COMPONENTS})
+	target_link_libraries(MathiumCore PUBLIC Boost::${BOOST_COMPONENT})
+endforeach()
+target_link_libraries(MathiumCore PUBLIC ${GMP_LIBRARIES} ${MPFR_LIBRARIES})
+
+
+# --- Main Executable ---
+add_executable(Mathium src/main.cpp)
+target_link_libraries(Mathium PRIVATE MathiumCore)
+
+
+# --- Test Executable ---
 file(GLOB_RECURSE TEST_SOURCES "test/*.cpp")
 add_executable(MathiumTest ${TEST_SOURCES})
 
-# Link the GoogleTest libraries
-target_link_libraries(MathiumTest gtest gtest_main)
-
-# Discover and run the tests
-include(GoogleTest)
-gtest_discover_tests(MathiumTest)
-
-
-
-# Add the executable target
-file(GLOB_RECURSE SOURCES "src/*.cpp")
-add_executable(Mathium ${SOURCES})
-message(STATUS "Sources: ${SOURCES}")
-
-# Link the Boost libraries
-foreach(BOOST_COMPONENT ${BOOST_COMPONENTS})
-	target_link_libraries(Mathium Boost::${BOOST_COMPONENT})	
-endforeach()
-
-# Link the GMP and MPFR libraries
-target_link_libraries(Mathium ${GMP_LIBRARIES} ${MPFR_LIBRARIES})
+# Link the GoogleTest libraries and MathiumCore
+target_link_libraries(MathiumTest PRIVATE MathiumCore gtest gtest_main)
 
 
 
 target_include_directories(Mathium PRIVATE
 	"${PROJECT_BINARY_DIR}"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include"
+	"${CMAKE_CURRENT_SOURCE_DIR}/src"
 	#${HEADER_PATHS}
 )
 

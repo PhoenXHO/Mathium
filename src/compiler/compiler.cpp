@@ -1,11 +1,11 @@
 #include <any>
 
 #include "compiler/compiler.hpp"
-#include "object/integer_object.hpp"
-#include "object/real_object.hpp"
+#include "runtime/object/integer_object.hpp"
+#include "runtime/object/real_object.hpp"
 #include "util/globals.hpp"
 #include "util/config.hpp"
-#include "class/builtins.hpp"
+#include "runtime/class/builtins.hpp"
 
 void Compiler::compile_source(void)
 {

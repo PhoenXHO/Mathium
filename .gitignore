@@ -1,6 +1,6 @@
 # build directories
 /build/
-/cmake-build-debug/
+/cmake-build-util/debug/
 /cmake-build-release/
 /out/
 
