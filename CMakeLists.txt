@@ -133,7 +133,6 @@ target_link_libraries(MathiumTest PRIVATE MathiumCore gtest gtest_main)
 
 target_include_directories(Mathium PRIVATE
 	"${PROJECT_BINARY_DIR}"
-	"${CMAKE_CURRENT_SOURCE_DIR}/include"
 	"${CMAKE_CURRENT_SOURCE_DIR}/src"
 	#${HEADER_PATHS}
 )
