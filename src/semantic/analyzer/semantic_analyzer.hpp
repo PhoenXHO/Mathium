@@ -3,11 +3,11 @@
 #include <memory>
 
 #include "frontend/parser/ast.hpp"
-#include "runtime/object/object.hpp"
+#include "runtime/core/object/object.hpp"
 #include "semantic/scope/scope.hpp"
-#include "runtime/class/class.hpp"
+#include "runtime/core/class/class.hpp"
 #include "semantic/type/type.hpp"
-#include "core/function/function.hpp"
+#include "runtime/core/function/function.hpp"
 
 
 // This class will be responsible for type checking and other semantic analysis tasks

@@ -6,7 +6,7 @@
 #include "runtime/memory/memory.hpp" // for `set_dynamic_precision`
 #include "util/benchmark.hpp" // for `Benchmark`
 
-#include "runtime/object/reference_object.hpp"
+#include "runtime/core/object/reference_object.hpp"
 
 
 InterpretResult VM::interpret_source(bool interrupted)

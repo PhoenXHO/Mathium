@@ -2,7 +2,7 @@
 
 #include "frontend/parser/parser.hpp"
 #include "util/globals.hpp"
-#include "runtime/class/builtins.hpp"
+#include "runtime/core/class/builtin_class_init.hpp"
 
 
 void Parser::parse_source(void)

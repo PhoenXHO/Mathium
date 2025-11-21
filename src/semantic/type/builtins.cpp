@@ -1,8 +1,8 @@
 #include "semantic/type/type_coercion.hpp"
-#include "runtime/class/builtins.hpp"
-#include "runtime/object/integer_object.hpp"
-#include "runtime/object/real_object.hpp"
-#include "core/function/function.hpp"
+#include "runtime/core/class/builtin_class_init.hpp"
+#include "runtime/builtins/objects/integer_object.hpp"
+#include "runtime/builtins/objects/real_object.hpp"
+#include "runtime/core/function/function.hpp"
 
 
 std::shared_ptr<TypeCoercion> TypeCoercion::m_instance = nullptr;

@@ -5,12 +5,12 @@
 #include <string_view>
 #include <iostream>
 
-#include "core/operator/operator.hpp"
-#include "runtime/object/object.hpp"
+#include "runtime/core/operator/operator.hpp"
+#include "runtime/core/object/object.hpp"
 #include "util/util.hpp"
-#include "runtime/class/class.hpp"
+#include "runtime/core/class/class.hpp"
 #include "semantic/type/type.hpp"
-#include "core/function/function.hpp"
+#include "runtime/core/function/function.hpp"
 
 
 struct AST;

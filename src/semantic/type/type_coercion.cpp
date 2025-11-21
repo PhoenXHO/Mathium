@@ -2,9 +2,9 @@
 #include <unordered_set>
 
 #include "semantic/type/type_coercion.hpp"
-#include "runtime/object/object.hpp"
-#include "runtime/class/class.hpp"
-#include "runtime/object/reference_object.hpp"
+#include "runtime/core/object/object.hpp"
+#include "runtime/core/class/class.hpp"
+#include "runtime/core/object/reference_object.hpp"
 
 
 void TypeCoercion::add_rule(ClassPtr from, ClassPtr to, CoercionFunction converter, MatchLevel match_level)

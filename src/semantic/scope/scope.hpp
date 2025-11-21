@@ -4,7 +4,7 @@
 #include <memory>
 #include <string>
 
-#include "core/variable/lookup_table.hpp"
+#include "semantic/scope/symbol_table.hpp"
 
 
 struct Scope

@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "runtime/object/object.hpp"
+#include "runtime/core/object/object.hpp"
 
 
 class ConstantPool

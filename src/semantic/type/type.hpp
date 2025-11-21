@@ -3,7 +3,7 @@
 #include <string>
 
 #include "util/forward.hpp"
-#include "runtime/class/builtins.hpp"
+#include "runtime/core/class/builtin_class_init.hpp"
 
 
 struct Type

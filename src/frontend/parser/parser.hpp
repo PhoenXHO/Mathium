@@ -6,7 +6,7 @@
 #include "frontend/lexer/lexer.hpp"
 #include "frontend/parser/ast.hpp"
 #include "frontend/lexer/token.hpp"
-#include "core/operator/operator.hpp"
+#include "runtime/core/operator/operator.hpp"
 
 
 class Parser

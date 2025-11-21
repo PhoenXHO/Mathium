@@ -1,5 +1,5 @@
 #include "semantic/type/type.hpp"
-#include "runtime/class/class.hpp"
+#include "runtime/core/class/class.hpp"
 
 
 std::string Type::to_string(void) const
