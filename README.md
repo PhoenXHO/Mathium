@@ -1,144 +1,230 @@
-# Mathium Interpreter (0.2.0-alpha.1)
+# Mathium Programming Language
 
-Mathium is a custom programming language designed for mathematical computations and symbolic expressions. This repository contains the source code for the Mathium interpreter, which is currently in the alpha stage of development.
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Version](https://img.shields.io/badge/version-0.2.0--alpha.1-orange.svg)](https://github.com/PhoenXHO/Mathium)
+[![Status](https://img.shields.io/badge/status-active%20development-brightgreen.svg)](https://github.com/PhoenXHO/Mathium)
 
-_Note: This project is a complete rewrite of the Mathium interpreter, with cleaner code and more organized structure. The interpreter will be able to run code in a REPL, and will have a better error handling system._
+> A programming language designed for mathematical computations with precise arithmetic and symbolic expressions.
+
+Mathium is a custom programming language that combines mathematical notation with modern programming language features. Built with arbitrary-precision arithmetic (GMP/MPFR), it's designed for applications requiring exact numerical computations.
+
+**Current Status:** Complete rewrite from prototype. Core interpreter functional with variables, functions, and basic expressions. Undergoing systematic refactoring and documentation before feature expansion.
+
+---
+
+## 🔗 Quick Links
+
+- **[Documentation](docs/)** - Language specification and design documents
+- **[Devlog Series](#)** - Follow the development journey *(coming soon)*
+- **[Contributing](CONTRIBUTING.md)** - How to contribute *(coming soon)*
+
+---
 
 ## Table of Contents
 - [Features](#features)
-	- [Current Features](#current-features)
-	- [Planned Features for 0.2.0-alpha.1](#planned-features-for-020-alpha1)
-	- [Future Features](#future-features)
 - [Getting Started](#getting-started)
-	- [Prerequisites](#prerequisites)
-	- [Building the Project](#building-the-project)
-	- [Running the Interpreter](#running-the-interpreter)
 - [Usage](#usage)
-	- [REPL Commands](#repl-commands)
-	- [Command Line Options](#command-line-options)
-- [Contributing](#contributing)
-	- [License](#license)
+- [Project Status](#project-status)
+- [Development](#development)
+- [License](#license)
+
+---
 
 ## Features
 
-### Current Features
-- Basic expressions with numbers, parentheses, and built-in operators
-	- Currently, only the addition operator (`+`) is supported (more operators will be added for this version)
-	- Precise operations with integers and floating-point numbers using GMP and MPFR libraries
-- REPL (Read-Eval-Print Loop) for interactive programming
-- Variable declarations and retrievals
-	- `let <variable>` to declare a variable
-	- `let <variable> := <expression>` to initialize a variable
-	- `let <type> <variable> := <expression>` to declare a variable with a specific type
-- Function calls (built-in functions only)
+### ✅ Currently Implemented
+- **Arbitrary-precision arithmetic** using GMP (integers) and MPFR (reals)
+- **Interactive REPL** with multi-line input support
+- **Variable declarations** with type inference and explicit typing
+  ```mathium
+  let x := 42              // Type inferred as Integer
+  let y: Real := 3.14159   // Explicit type annotation
+  ```
+- **Function calls** (builtin functions)
+- **Expression evaluation** with proper operator precedence
+- **Error handling** with source location tracking
 
-### Planned Features for 0.2.0-alpha.1
-- Read from a file with `.mthx` extension
-- More built-in operators
-- Variables and constants (with different scopes)
-- Function definitions
-- Built-in functions
-- Classes and objects
+### 🚧 In Progress (v0.2.0-alpha.1)
+- File-based script execution (`.mthx` files)
+- Additional builtin operators (`-`, `*`, `/`, `^`, etc.)
+- User-defined functions
+- Classes and object-oriented features
+- Comprehensive builtin function library
 
-### Future Features
-- Class definitions and object creation
-- Built-in classes
-- Type checking and type casting (implicit and explicit)
-- Control flow statements
-- More built-in functions and classes
-- Operator overloading and type cast overloading
-- Symbolic expressions and mappings
+### 🔮 Planned Features
+- **Rich type system** with inference, subtyping, and qualifiers (`const`, `ref`)
+- **Object model** - Everything is an object, classes are objects
+- **Operator overloading** for user-defined types
+- **Control flow** - `if`, `while`, `for`, `match` statements
+- **Pattern matching** and destructuring
+- **Symbolic expressions** and computer algebra features
+- **Module system** for code organization
+
+---
 
 ## Getting Started
 
 ### Prerequisites
-- CMake 3.29.7 or higher
-- Boost 1.74.0 or higher
-- GMP (GNU Multiple Precision Arithmetic Library)
-- MPFR (Multiple Precision Floating-Point Reliable Library)
-- A C++20 compatible compiler (e.g., g++)
+- **CMake** 3.29.7 or higher
+- **C++20 compatible compiler**
+- **GMP** - GNU Multiple Precision Arithmetic Library
+- **MPFR** - Multiple Precision Floating-Point Reliable Library
+- **Boost** 1.74.0 or higher
 
-### Building the Project
+### Installation
 
-To build the Mathium interpreter, follow these steps:
+#### Linux (Ubuntu/Debian)
+```bash
+# Install dependencies
+sudo apt-get update
+sudo apt-get install build-essential cmake libboost-all-dev libgmp-dev libmpfr-dev
 
-1. **Install the Prerequisites**:
-	- On Ubuntu/Debian:
-		```sh
-		# Update package list
-		sudo apt-get update
-		
-		# Install required packages
-		sudo apt-get install build-essential libboost-all-dev libgmp-dev libmpfr-dev
-		```
-	- On Fedora:
-		```sh
-		sudo dnf install cmake boost-devel gmp-devel mpfr-devel gcc-c++
-		```
-	- On macOS (using Homebrew):
-		```sh
-		brew install cmake boost gmp mpfr
-		```
-	- On Windows:
-		- Download and install CMake from [cmake.org](https://cmake.org/download/)
-		- Download and install Boost from [boost.org](https://www.boost.org/users/download/)
-		- Download and install GMP from [gmplib.org](https://gmplib.org/)
-		- Download and install MPFR from [mpfr.org](https://www.mpfr.org/)
-		- Ensure a C++20 compiler like MinGW or MSVC is installed
-		- _Add the paths to the libraries to the system environment variables_
-
-2. **Build the Project**:
-	1. Clone the repository:
-		```sh
-		git clone https://github.com/PhoenXHO/Mathium.git
-		cd Mathium
-		```
-
-	2. Create a build directory and navigate to it:
-		```sh
-		mkdir build
-		cd build
-		```
-
-	3. Configure the project using CMake:
-		```sh
-		cmake ..
-		```
-
-	4. Build the project:
-		```sh
-		make
-		```
-
-### Running the Interpreter
-To start the REPL:
-```sh
-./Mathium
+# Clone and build
+git clone https://github.com/PhoenXHO/Mathium.git
+cd Mathium
+mkdir build && cd build
+cmake ..
+make
 ```
 
-<!-- Not yet implemented -->
-<!--To run a Mathium script:
-```sh
-./Mathium -f <script.mthx>
-```-->
+#### Linux (Fedora)
+```bash
+sudo dnf install cmake boost-devel gmp-devel mpfr-devel gcc-c++
+# Then follow clone and build steps above
+```
+
+#### macOS
+```bash
+# Install dependencies via Homebrew
+brew install cmake boost gmp mpfr
+
+# Clone and build
+git clone https://github.com/PhoenXHO/Mathium.git
+cd Mathium
+mkdir build && cd build
+cmake ..
+make
+```
+
+#### Windows
+1. Install [CMake](https://cmake.org/download/)
+2. Install dependencies via [vcpkg](https://vcpkg.io/):
+   ```cmd
+   vcpkg install boost gmp mpfr
+   ```
+3. Clone and build:
+   ```cmd
+   git clone https://github.com/PhoenXHO/Mathium.git
+   cd Mathium
+   mkdir build && cd build
+   cmake .. -DCMAKE_TOOLCHAIN_FILE=[vcpkg root]/scripts/buildsystems/vcpkg.cmake
+   cmake --build .
+   ```
+
+---
 
 ## Usage
 
+### Interactive REPL
+Start the Mathium REPL:
+```bash
+./Mathium
+```
+
+Example session:
+```mathium
+Mathium> let x := 42
+Mathium> let y := 3.14159
+Mathium> x + y
+45.14159
+Mathium> let double := \n -> n * 2
+Mathium> double(x)
+84
+```
+
 ### REPL Commands
-- `quit` or `exit`: Terminate the interpreter
-- `\` at the end of a line: Continue on the next line. Note that if the line is incomplete, the interpreter will wait for more input, and if you want to cancel continuing on the next line, hit `Enter` without typing anything.
+- **`quit`** or **`exit`** - Exit the interpreter
+- **`\`** at end of line - Continue input on next line
+- Press **Enter** on empty line to cancel multi-line input
 
 ### Command Line Options
-- `-h, --help`: Display help message
-- `-v, --version`: Display interpreter version
-- `-f, --file <file>`: Read from a file with `.mthx` extension
-<!--- `-D, --dev`: Enable debug mode-->
-- `-V, --verbose`: Enable verbose output
-- `-P, --print-all`: Print all expressions without a semicolon at the end (if not enabled, only the last expression will be printed)
-- `-b, --benchmark`: Enable benchmark mode (print execution time at the end of the program)
+```bash
+Usage: Mathium [<options>]
+Options:
+  -h [ --help ]         Display this help message
+  -v [ --version ]      Display interpreter version and additional information
+  -f [ --file ] <file>  Read from a file. <file> must have the `.mthx` 
+                        extension
+  -V [ --verbose ]      Enable verbose output
+  -P [ --print-all ]    Print all expressions that do not have a semicolon at 
+                        the end (if this option is not enabled, only the last 
+                        expression will be printed)
+  -b [ --benchmark ]    Print the time taken to execute the program at the end 
+                        of execution (in microseconds)
+  -W [ --no-warn ]      Disable warnings
+```
 
-## Contributing
-Contributions are welcome! For major changes, please open an issue first to discuss what you would like to change.
+### Example Script
+Create a file `hello.mthx`:
+```mathium
+let greet := \name -> "Hello, " ++ name ++ "!"
+greet("World")
+```
 
-### License
-This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
+Run it:
+```bash
+./Mathium -f hello.mthx
+```
+
+## Development
+
+### Project Structure
+```
+src/
+├── frontend/        # Lexer, parser, AST
+├── semantic/        # Type checking, symbol resolution
+├── compiler/        # Bytecode generation
+├── runtime/         # VM, object model, builtins
+└── util/            # Error handling, config, debugging
+```
+
+See [`docs/`](docs/) for detailed architecture documentation.
+
+### Contributing
+
+Contributions are welcome! This project is currently undergoing major refactoring. If you'd like to contribute:
+
+1. **Check the roadmap** *(coming soon in `docs/contributing/`)*
+2. **Open an issue** to discuss your proposed changes
+3. **Follow the style guide** *(coming soon in `docs/contributing/`)*
+4. **Write tests** for new features
+
+---
+
+## Version History
+- **0.2.0-alpha.1** (In Progress) - Complete rewrite with improved architecture
+- **0.1.x** - Initial prototype (deprecated)
+
+## License
+
+This project is licensed under the **GNU General Public License v3.0** - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## Acknowledgments
+
+- **GMP** - Arbitrary precision integer arithmetic
+- **MPFR** - Arbitrary precision floating-point arithmetic
+- **Boost** - C++ utility libraries
+
+---
+
+## Contact & Follow
+
+- **GitHub:** [@PhoenXHO](https://github.com/PhoenXHO)
+- **Medium:** Follow for devlogs *(coming soon)*
+- **LinkedIn:** Connect for updates *(coming soon)*
+
+---
+
+*Last Updated: November 21, 2025*
