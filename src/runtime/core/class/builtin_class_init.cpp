@@ -1,5 +1,5 @@
 #include "runtime/core/class/builtin_class_init.hpp"
-#include "semantic/type/builtins.hpp"
+#include "runtime/builtins/types/builtin_type_coercions.hpp"
 #include "runtime/builtins/classes/mathobj_class.hpp"
 #include "runtime/builtins/classes/class_class.hpp"
 #include "runtime/builtins/classes/function_class.hpp"
