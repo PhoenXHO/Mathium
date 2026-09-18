@@ -137,9 +137,8 @@ Mathium> let x := 42
 Mathium> let y := 3.14159
 Mathium> x + y
 45.14159
-Mathium> let double := \n -> n * 2
-Mathium> double(x)
-84
+Mathium> print(add(x, 8))
+50
 ```
 
 ### REPL Commands
@@ -153,8 +152,6 @@ Usage: Mathium [<options>]
 Options:
   -h [ --help ]         Display this help message
   -v [ --version ]      Display interpreter version and additional information
-  -f [ --file ] <file>  Read from a file. <file> must have the `.mthx` 
-                        extension
   -V [ --verbose ]      Enable verbose output
   -P [ --print-all ]    Print all expressions that do not have a semicolon at 
                         the end (if this option is not enabled, only the last 
@@ -164,7 +161,8 @@ Options:
   -W [ --no-warn ]      Disable warnings
 ```
 
-### Example Script
+<!-- ### Example Script — hidden until file execution (.mthx) is implemented.
+
 Create a file `hello.mthx`:
 ```mathium
 let greet := \name -> "Hello, " ++ name ++ "!"
@@ -175,6 +173,7 @@ Run it:
 ```bash
 ./Mathium -f hello.mthx
 ```
+-->
 
 ## Development
 
@@ -227,4 +226,4 @@ This project is licensed under the **GNU General Public License v3.0** - see the
 
 ---
 
-*Last Updated: November 21, 2025*
+*Last Updated: September 19, 2026*

@@ -1,0 +1,9 @@
+// basics.mthx — variables, typing, and arithmetic
+// Until file execution ships, paste these lines into the REPL to try them.
+
+let x := 42              // type inferred: Integer
+let y := 8               // type inferred: Integer
+let pi: Real := 3.14159  // explicit type annotation
+
+print(add(x, y))         // 50
+print(x + y)             // 50
